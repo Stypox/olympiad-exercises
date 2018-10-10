@@ -4,6 +4,9 @@
 #include <sys/stat.h>
 #endif
 
+
+#include <math.h>
+
 using i = long long;
 using ui = unsigned long long;
 using f = long double;
@@ -154,10 +157,8 @@ namespace io {
 using io::in;
 using io::out;
 
-	if (a == static_cast<ui>(sqrtA) * static_cast<ui>(sqrtA))
-		return floor(sqrtB - sqrtA) + 1;
-	else
-		return round(sqrtB - sqrtA);
+constexpr ui squareNumbers(const ui a, const ui b) {
+	return floor(sqrt(b)) - ceil(sqrt(a)) + 1;
 }
 
 int main() {
