@@ -1,5 +1,4 @@
-#include <string>
-#include <iostream>
+#include <bits/stdc++.h>
 #ifdef __linux__
 #include <sys/stat.h>
 #endif
