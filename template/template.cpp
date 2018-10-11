@@ -30,6 +30,7 @@ namespace io {
 using i = long long;
 using ui = unsigned long long;
 using f = long double;
+using str = std::string;
 using io::in;
 using io::out;
 
