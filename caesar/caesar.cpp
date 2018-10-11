@@ -39,19 +39,19 @@ using io::in;
 using io::out;
 using std::get;
 
-inline void subtract(ch& letter, ch n) {
+inline __attribute__((always_inline)) void subtract(ch& letter, ch n) {
 	constexpr ch AtoZ = 26;
 	ch subtracted = letter - n;
 	letter = (subtracted >= 'a') ? (subtracted) : (subtracted + AtoZ);
 }
 
-inline void normalize(str& string) {
+inline __attribute__((always_inline)) void normalize(str& string) {
 	ch toSubtract = string[0] - 'a';
 	for (auto&& letter : string)
 		subtract(letter, toSubtract);
 }
 
-inline i caesar(vec& strings) {
+inline __attribute__((always_inline)) i caesar(vec& strings) {
 	map seenStrings;
 	for (auto&& string : strings) {
 		normalize(string);
