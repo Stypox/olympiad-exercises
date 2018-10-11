@@ -111,21 +111,21 @@ namespace io {
 #else
 	inline __attribute__((always_inline)) Input::Input() {
 		std::FILE* file = fopen(inputFilename, "r");
-		#ifdef DEBUG
+	#ifdef DEBUG
 		if (!file) {
 			perror(("Unable to open file " + std::string{inputFilename}).c_str());
 			exit(1);
 		}
-		#endif
-		#ifdef __linux__
+	#endif
+	#ifdef __linux__
 		struct stat info;
 		fstat(fileno(file), &info);
 		size_t size = info.st_size;
-		#else
+	#else
 		fseek(file, 0, SEEK_END);
 		size_t size = ftell(file);
 		fseek(file, 0, SEEK_SET);
-		#endif
+	#endif
 
 		m_data = new char[size + 1];
 		m_dataBegin = m_data;
