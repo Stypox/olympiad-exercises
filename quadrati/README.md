@@ -1,0 +1,1 @@
+# [Quadrati perfetti](https://training.olinfo.it/#/task/quadrati)
