@@ -6,3 +6,4 @@
 *.exe
 
 **/.vscode/
+!template/.vscode/

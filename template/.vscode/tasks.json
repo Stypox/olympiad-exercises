@@ -1,0 +1,42 @@
+{
+    "label": "build, run, clean",
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build and run",
+            "command": "echo '--------------------> Compiling main.exe...' && g++ -std=c++11 -Wall -Wextra -Wformat -Wdouble-promotion -Wchkp -Wpedantic main.cpp -o main.exe -DDEBUG -DUSE_STDOUT && echo '--------------------> Compiled' && echo '--------------------> Running main.exe...' && ./main.exe || echo '--------------------> Return value: '$?",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "echo": true
+            }
+        },
+        {
+            "label": "run",
+            "command": "echo '--------------------> Running main.exe...' && ./main.exe || echo '--------------------> Return value: '$?",
+            "type": "shell",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "echo": true
+            }
+        },
+        {
+            "label": "clean",
+            "command": "rm main.exe",
+            "type": "shell",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "echo": true
+            }
+        }
+    ]
+}
