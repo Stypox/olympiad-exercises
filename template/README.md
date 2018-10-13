@@ -1,4 +1,3 @@
-[](https://training.olinfo.it/#/task//statement)
 # Template resources
 ### This folder contains some useful resources common to every task:
 - classes to handle **input/output** in a simple, fast and flexible way. By default they use input.txt and output.txt, but by defining ``USE_STDIN`` or ``USE_STDOUT`` this can be changed;
@@ -7,3 +6,4 @@
 - ``<bits/stdc++.h>`` is #include'd, to make **compilation faster** and remove the problem of remembering the name of a library;
 - ``main()`` with **empty body**;
 - ``README.md`` with default **olympiad links**;
+<!--# [ ()](https://training.olinfo.it/#/task//statement)
