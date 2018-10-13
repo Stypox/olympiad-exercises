@@ -40,7 +40,7 @@ using io::out;
 #pragma endregion
 
 int main() {
-	vec<str> a;
+	
 	return 0;
 }
 
