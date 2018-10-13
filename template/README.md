@@ -6,4 +6,5 @@
 - ``<bits/stdc++.h>`` is #include'd, to make **compilation faster** and remove the problem of remembering the name of a library;
 - ``main()`` with **empty body**;
 - ``README.md`` with default **olympiad links**;
+- A Visual Studio Code configuration file for tasks such as **build, run** and clean.
 <!--# [ ()](https://training.olinfo.it/#/task//statement)
