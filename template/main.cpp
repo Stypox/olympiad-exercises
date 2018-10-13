@@ -1,3 +1,4 @@
+#pragma region
 #include <bits/stdc++.h>
 #ifdef __linux__
 #include <sys/stat.h>
@@ -33,13 +34,17 @@ using ui = unsigned long long;
 using f = long double;
 using ch = char;
 using str = std::string;
+template <typename T> using vec = std::vector<T>;
 using io::in;
 using io::out;
+#pragma endregion
 
 int main() {
-	
+	vec<str> a;
+	return 0;
 }
 
+#pragma region
 namespace io {
 	constexpr const char* inputFilename = "input.txt", * outputFilename = "output.txt";
 
@@ -180,3 +185,4 @@ namespace io {
 		return *this;
 	}
 }
+#pragma endregion

@@ -4,7 +4,7 @@
     "tasks": [
         {
             "label": "build and run",
-            "command": "echo '--------------------> Compiling main.exe...' && g++ -std=c++11 -Wall -Wextra -Wformat -Wdouble-promotion -Wchkp -Wpedantic main.cpp -o main.exe -DDEBUG -DUSE_STDOUT && echo '--------------------> Compiled' && echo '--------------------> Running main.exe...' && ./main.exe || echo '--------------------> Return value: '$?",
+            "command": "(echo '--------------------> Compiling main.exe...' && g++ -std=c++11 -Wall -Wextra -Wformat -Wdouble-promotion -Wchkp -Wpedantic main.cpp -o main.exe -DDEBUG -DUSE_STDOUT && echo '--------------------> Compiled' && echo '--------------------> Running main.exe...' && ./main.exe && echo '--------------------> Return value: '$?) || echo '--------------------> Return value: '$?",
             "type": "shell",
             "group": {
                 "kind": "build",
@@ -18,7 +18,7 @@
         },
         {
             "label": "run",
-            "command": "echo '--------------------> Running main.exe...' && ./main.exe || echo '--------------------> Return value: '$?",
+            "command": "(echo '--------------------> Running main.exe...' && ./main.exe && echo '--------------------> Return value: '$?) || echo '--------------------> Return value: '$?",
             "type": "shell",
             "group": "test",
             "presentation": {
@@ -29,7 +29,7 @@
         },
         {
             "label": "clean",
-            "command": "rm main.exe",
+            "command": "(echo '--------------------> Removing main.exe...' && rm main.exe && echo '--------------------> Return value: '$?) || echo '--------------------> Return value: '$?",
             "type": "shell",
             "group": "test",
             "presentation": {
