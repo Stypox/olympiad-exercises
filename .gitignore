@@ -1,5 +1,7 @@
 **/input.txt
+!template/input.txt
 **/output.txt
+!template/output.txt
 
 *.exe
 
