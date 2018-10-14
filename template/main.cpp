@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #endif
 #define INLINE inline __attribute__((always_inline))
+#define WORD_SEPARATOR " "
 
 namespace io {
 	class Input {
@@ -49,22 +50,22 @@ namespace io {
 	constexpr const char* inputFilename = "input.txt", * outputFilename = "output.txt";
 
 	template<typename T> struct to_format;
-	template<>         struct to_format<signed   char     > { static constexpr const char * format = "%hhd "; };
-	template<>         struct to_format<unsigned char     > { static constexpr const char * format = "%hhu "; };
-	template<>         struct to_format<signed   short    > { static constexpr const char * format = "%hd ";  };
-	template<>         struct to_format<unsigned short    > { static constexpr const char * format = "%hu ";  };
-	template<>         struct to_format<signed   int      > { static constexpr const char * format = "%d ";   };
-	template<>         struct to_format<unsigned int      > { static constexpr const char * format = "%u ";   };
-	template<>         struct to_format<signed   long     > { static constexpr const char * format = "%ld ";  };
-	template<>         struct to_format<unsigned long     > { static constexpr const char * format = "%lu ";  };
-	template<>         struct to_format<signed   long long> { static constexpr const char * format = "%lld "; };
-	template<>         struct to_format<unsigned long long> { static constexpr const char * format = "%llu "; };
-	template<>         struct to_format<float             > { static constexpr const char * format = "%f ";   };
-	template<>         struct to_format<double            > { static constexpr const char * format = "%f ";   };
-	template<>         struct to_format<long double       > { static constexpr const char * format = "%Lf ";  };
-	template<>         struct to_format<const char*       > { static constexpr const char * format = "%s ";   };
-	template<>         struct to_format<      char*       > { static constexpr const char * format = "%s ";   };
-	template<size_t n> struct to_format<      char[n]     > { static constexpr const char * format = "%s ";   };
+	template<>         struct to_format<signed   char     > { static constexpr const char * format = "%hhd" WORD_SEPARATOR; };
+	template<>         struct to_format<unsigned char     > { static constexpr const char * format = "%hhu" WORD_SEPARATOR; };
+	template<>         struct to_format<signed   short    > { static constexpr const char * format = "%hd"  WORD_SEPARATOR; };
+	template<>         struct to_format<unsigned short    > { static constexpr const char * format = "%hu"  WORD_SEPARATOR; };
+	template<>         struct to_format<signed   int      > { static constexpr const char * format = "%d"   WORD_SEPARATOR; };
+	template<>         struct to_format<unsigned int      > { static constexpr const char * format = "%u"   WORD_SEPARATOR; };
+	template<>         struct to_format<signed   long     > { static constexpr const char * format = "%ld"  WORD_SEPARATOR; };
+	template<>         struct to_format<unsigned long     > { static constexpr const char * format = "%lu"  WORD_SEPARATOR; };
+	template<>         struct to_format<signed   long long> { static constexpr const char * format = "%lld" WORD_SEPARATOR; };
+	template<>         struct to_format<unsigned long long> { static constexpr const char * format = "%llu" WORD_SEPARATOR; };
+	template<>         struct to_format<float             > { static constexpr const char * format = "%f"   WORD_SEPARATOR; };
+	template<>         struct to_format<double            > { static constexpr const char * format = "%f"   WORD_SEPARATOR; };
+	template<>         struct to_format<long double       > { static constexpr const char * format = "%Lf"  WORD_SEPARATOR; };
+	template<>         struct to_format<const char*       > { static constexpr const char * format = "%s"   WORD_SEPARATOR; };
+	template<>         struct to_format<      char*       > { static constexpr const char * format = "%s"   WORD_SEPARATOR; };
+	template<size_t n> struct to_format<      char[n]     > { static constexpr const char * format = "%s"   WORD_SEPARATOR; };
 
 	template<typename T> T read(char*& str);
 	template<> INLINE signed   char      read<signed   char     >(char*& str) { return std::strtol  (str, &str, 0); }
