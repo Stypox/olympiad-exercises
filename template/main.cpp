@@ -145,7 +145,7 @@ namespace io {
 	}
 	INLINE Input::~Input() {
 	#ifdef DEBUG // leaking memory is not bad, because it reduces time.
-		delete m_dataBegin;
+		delete[] m_dataBegin;
 	#endif
 	}
 	template <typename T> INLINE Input& Input::operator>> (T& data) {
