@@ -9,6 +9,7 @@ using f = long double;
 using ch = char;
 using str = std::string;
 template <typename T> using vec = std::vector<T>;
+template <typename T, size_t N> using arr = std::array<T, N>;
 
 #ifdef __linux__
 #include <sys/stat.h>
