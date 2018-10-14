@@ -1,1 +1,1 @@
-# [Studio amico (studioamico)](https://training.olinfo.it/#/task/studioamico/statement)
+# [Studio amico (studioamico)](https://training.olinfo.it/#/task/abc_studioamico/statement)
