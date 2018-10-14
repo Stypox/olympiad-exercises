@@ -5,6 +5,7 @@
 #endif
 #define INLINE inline __attribute__((always_inline))
 #define WORD_SEPARATOR " "
+#pragma GCC optimize ("O3")
 
 namespace io {
 	class Input {
