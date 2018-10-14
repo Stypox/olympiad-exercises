@@ -1,11 +1,19 @@
 #pragma region
+#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
+
+#define WORD_SEPARATOR " "
+using i = long long;
+using ui = unsigned long long;
+using f = long double;
+using ch = char;
+using str = std::string;
+template <typename T> using vec = std::vector<T>;
+
 #ifdef __linux__
 #include <sys/stat.h>
 #endif
 #define INLINE inline __attribute__((always_inline))
-#define WORD_SEPARATOR " "
-#pragma GCC optimize ("O3")
 
 namespace io {
 	class Input {
@@ -29,25 +37,8 @@ namespace io {
 		INLINE ~Output();
 		template <typename T> INLINE Output& operator<< (const T& data);
 	} out;
-}
 
-using i = long long;
-using ui = unsigned long long;
-using f = long double;
-using ch = char;
-using str = std::string;
-template <typename T> using vec = std::vector<T>;
-using io::in;
-using io::out;
-#pragma endregion
 
-int main() {
-	
-	return 0;
-}
-
-#pragma region
-namespace io {
 	constexpr const char* inputFilename = "input.txt", * outputFilename = "output.txt";
 
 	template<typename T> struct to_format;
@@ -187,4 +178,11 @@ namespace io {
 		return *this;
 	}
 }
+using io::in;
+using io::out;
 #pragma endregion
+
+int main() {
+	
+	return 0;
+}
