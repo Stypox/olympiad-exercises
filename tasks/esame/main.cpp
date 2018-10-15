@@ -183,30 +183,26 @@ using io::in;
 using io::out;
 #pragma endregion
 
+INLINE ui max(std::initializer_list<ui> elements) {
+	return *std::max_element(elements.begin(), elements.end());
+}
+
 INLINE ui maxDifficulty(uint_fast8_t* diff, ui size) {
-	if (size == 2)
-		return std::max(diff[0], diff[1]);
-	else if (size == 3)
-		return *std::max_element(diff, diff + size);
+	arr<ui, 4> tookFirst {0, 0, 0, diff[0]},
+			notTookFirst {0, 0, 0, diff[1]};
 
-	auto maxTookFirst = new ui[size - 1],
-		maxNotTookFirst = new ui[size - 1];
-
-	maxTookFirst[0] = diff[0];
-	maxTookFirst[1] = diff[1];
-	maxTookFirst[2] = diff[0] + diff[2];
-
-	maxNotTookFirst[0] = diff[1];
-	maxNotTookFirst[1] = diff[2];
-	maxNotTookFirst[2] = diff[1] + diff[3];
-
-	for (ui pos = 3; pos < size - 1; ++pos) {
-		maxTookFirst[pos] = diff[pos] + std::max(maxTookFirst[pos - 2], maxTookFirst[pos - 3]);
-		maxNotTookFirst[pos] = diff[pos + 1] + std::max(maxNotTookFirst[pos - 2], maxNotTookFirst[pos - 3]);
+	for (ui pos = 1; pos < size - 1; ++pos) {
+		tookFirst[0] = tookFirst[1];
+		tookFirst[1] = tookFirst[2];
+		tookFirst[2] = tookFirst[3];
+		tookFirst[3] = diff[pos] + std::max(tookFirst[0], tookFirst[1]);
+		notTookFirst[0] = notTookFirst[1];
+		notTookFirst[1] = notTookFirst[2];
+		notTookFirst[2] = notTookFirst[3];
+		notTookFirst[3] = diff[pos + 1] + std::max(notTookFirst[0], notTookFirst[1]);
 	}
 
-	arr<ui, 4> possibleMax{maxTookFirst[size - 2], maxNotTookFirst[size - 2], maxTookFirst[size - 3], maxNotTookFirst[size - 3]};	
-	return *std::max_element(possibleMax.begin(), possibleMax.end());
+	return max({tookFirst[2], tookFirst[3], notTookFirst[2], notTookFirst[3]});
 }
 
 int main() {
