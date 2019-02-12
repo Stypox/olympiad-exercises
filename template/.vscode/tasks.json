@@ -37,6 +37,17 @@
                 "panel": "new",
                 "echo": true
             }
+        },
+        {
+            "label": "update",
+            "command": "",
+            "type": "shell",
+            "group": "test",
+            "presentation": {
+                "reveal": "never",
+                "panel": "dedicated",
+                "echo": true
+            }
         }
     ]
 }
