@@ -4,7 +4,7 @@
     "tasks": [
         {
             "label": "build and run",
-            "command": "(echo '--------------------> Compiling main.exe...' && g++ -g -O0 -DDEBUG -DUSE_STDOUT -std=c++11 -Wall -Wextra -Wformat -Wdouble-promotion -Wchkp -Wpedantic main.cpp -o main.exe && echo '--------------------> Compiled' && echo '--------------------> Running main.exe...' && ./main.exe && echo '--------------------> Return value: '$?) || echo '--------------------> Return value: '$?",
+            "command": "(echo '--------------------> Compiling main.exe...' && g++ -g -O0 -DDEBUG -DUSE_STDOUT -std=c++11 -Wall -Wextra -Wformat -Wdouble-promotion -Wchkp -Wpedantic -Wnounknown-pragmas main.cpp -o main.exe && echo '--------------------> Compiled' && echo '--------------------> Running main.exe...' && ./main.exe && echo '--------------------> Return value: '$?) || echo '--------------------> Return value: '$?",
             "type": "shell",
             "group": {
                 "kind": "build",
