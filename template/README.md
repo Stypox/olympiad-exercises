@@ -6,8 +6,7 @@
 - ``<bits/stdc++.h>`` is #include'd, to make **compilation faster** and remove the problem of remembering the name of a library;
 - ``main()`` with ``return 0``;
 - ``README.md`` with default **olympiad links** and score placeholder;
-- A vscode configuration file "tasks.json" for tasks such as **build, run** and clean;
+- A vscode configuration file "tasks.json" for tasks such as **build, run** and clean. Many compiler warnings are enabled;
 - Everything needed to debug: vscode configuration file "launch.json", ``-g`` compiler option, disabled optimizations (but only when debugging);
-- Many warnings enabled for the compiler;
 <!--# [ ()](https://training.olinfo.it/#/task//statement)
 <!--Score: /100
