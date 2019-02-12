@@ -8,3 +8,4 @@
 - ``README.md`` with default **olympiad links**;
 - A Visual Studio Code configuration file for tasks such as **build, run** and clean.
 <!--# [ ()](https://training.olinfo.it/#/task//statement)
+<!--Score: /100
