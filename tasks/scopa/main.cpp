@@ -192,16 +192,26 @@ struct Card {
 io::Input& operator>>(io::Input& input, Card& card) {
 	str data;
 	input >> data;
-	if (data[1] == 'G')
+
+	char typeCh;
+	if (data[1] >= '0' && data[1] <= '9') {
+		card.value = 10;
+		typeCh = data[2];
+	}
+	else {
+		card.value = data[0] - '0';
+		typeCh = data[1];
+	}
+
+	if (typeCh == 'G')
 		card.type = G;
-	else if (data[1] == 'S')
+	else if (typeCh == 'S')
 		card.type = S;
-	else if (data[1] == 'C')
+	else if (typeCh == 'C')
 		card.type = C;
-	else if (data[1] == 'B')
+	else if (typeCh == 'B')
 		card.type = B;
 
-	card.value = data[0] - '0';
 	return input;
 }
 io::Output& operator<<(io::Output& output, Card& card) {
@@ -215,7 +225,7 @@ io::Output& operator<<(io::Output& output, Card& card) {
 		output << "C";
 	if (card.type == B)
 		output << "B";
-	
+
 	output << " ";
 	return output;
 }
@@ -280,11 +290,7 @@ bool removeIfSumUpTo(int8_t value, vec<Card>& table) {
 bool trySetteBelloHand(vec<Card>& hand, vec<Card>& table) {
 	for(auto it = hand.begin(); it != hand.end(); ++it) {
 		if(*it == Card{G, 7}) {
-			if (removeIfEqual(7, table)) {
-				out << *it;
-				return true;
-			}
-			if (removeIfSumUpTo(7, table)) {
+			if (removeIfEqual(7, table) || removeIfSumUpTo(7, table)) {
 				out << *it;
 				return true;
 			}
@@ -316,13 +322,30 @@ bool trySetteBelloTable(vec<Card>& hand, vec<Card>& table) {
 
 bool trySeven(vec<Card>& hand, vec<Card>& table) {
 	for(auto it = hand.begin(); it != hand.end(); ++it) {
-		if(it->value == 7) {
-			if (removeIfSumUpTo(7, table)) {
-				out << *it;
-				return true;
-			}
+		if (it->value == 7 && remove4IfSumUpTo(it->value, table)) {
+			out << *it;
+			return true;
 		}
 	}
+	for(auto it = hand.begin(); it != hand.end(); ++it) {
+		if (it->value == 7 && removeIfEqual(7, table)) {
+			out << *it;
+			return true;
+		}
+	}
+	for(auto it = hand.begin(); it != hand.end(); ++it) {
+		if (it->value == 7 && remove3IfSumUpTo(it->value, table)) {
+			out << *it;
+			return true;
+		}
+	}
+	for(auto it = hand.begin(); it != hand.end(); ++it) {
+		if (it->value == 7 && remove2IfSumUpTo(it->value, table)) {
+			out << *it;
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -360,7 +383,7 @@ int main() {
 		in >> c;
 	for(auto& c : table)
 		in >> c;
-	
+
 	trySetteBelloHand(hand, table) ||
 	tryScopa(hand, table) ||
 	trySetteBelloTable(hand, table) ||
