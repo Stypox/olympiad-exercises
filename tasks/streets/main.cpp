@@ -185,43 +185,49 @@ using io::in;
 using io::out;
 #pragma endregion
 
-struct City;
-
 struct City {
-	i budget{};
-	vec<i> streets;
+	i budget, nrStreets = 0;
+	float ratio() {
+		if (budget >= nrStreets && budget != 0)
+			return 1.5f;
+		return (float)budget/nrStreets;
+	}
+};
+struct Street {
+	i from, to;
+	float coefficient = 0.0f;
 
-	bool removed = false;
-	void checkRemoved();
+	Street(i a, i b);
+	void build();
+	void updateCoefficient();
 
-	bool operator<(const City& other) {
-		if (other.removed) return false;
-		if (removed) return true;
-		return (float)budget/streets.size() < (float)other.budget/other.streets.size();
+	bool operator<(const Street& s) {
+		return coefficient < s.coefficient;
 	}
 };
 
 vec<City> cities;
+vec<Street> streets;
 
-void City::checkRemoved() {
-	if (!removed) {
-		if (budget == 0) {
-			removed = true;
-			return;
-		}
-		
-		bool areAllRemoved = true;
-		for(auto&& street : streets) {
-			if(cities[street].budget == 0)
-				cities[street].removed = true;
-			else
-				areAllRemoved &= false;
-		}
-		if (areAllRemoved) {
-			removed = true;
-			return;
-		}
-	}
+Street::Street(i a, i b) :
+from{a}, to{b} {
+	++cities[from].nrStreets;
+	++cities[to].nrStreets;
+}
+void Street::build() {
+	--cities[from].budget;
+	--cities[to].budget;
+	--cities[from].nrStreets;
+	--cities[to].nrStreets;
+	out << from << " " << to << "\n";
+}
+void Street::updateCoefficient() {
+	float a = cities[from].ratio();
+	float b = cities[to].ratio();
+	if (a == 0.0f || b == 0.0f)
+		coefficient = -1.0f;
+	else
+		coefficient = a + b;
 }
 
 int main() {
@@ -232,33 +238,21 @@ int main() {
 	for(auto& city : cities)
 		in >> city.budget;
 	
+	streets.reserve(M);
 	for(int m = 0; m != M; ++m) {
 		i a, b;
 		in >> a >> b;
-
-		cities[a].streets.push_back(b);
-		cities[b].streets.push_back(a);
+		streets.push_back({a, b});
 	}
 
-	for(auto& city : cities)
-		city.checkRemoved();
-
 	while(1) {
-		auto max = std::max_element(cities.begin(), cities.end());
-		if (max->removed) break;
+		for(auto& s : streets) s.updateCoefficient();
+		streets.erase(std::remove_if(streets.begin(), streets.end(), [](Street& s){ return s.coefficient < 0.0f; }), streets.end());
+		if (streets.empty()) break;
 
-		auto maxStreet = std::max_element(max->streets.begin(), max->streets.end(), [](i a, i b) { return cities[a] < cities[b]; });
-		i maxStreetInt = *maxStreet;
-		--max->budget;
-		--cities[maxStreetInt].budget;
-
-		out << max - cities.begin() << " " << maxStreetInt << "\n";
-
-		cities[maxStreetInt].streets.erase(std::find(cities[maxStreetInt].streets.begin(), cities[maxStreetInt].streets.end(), max - cities.begin()));
-		max->streets.erase(maxStreet);
-
-		for(auto& city : cities)
-			city.checkRemoved();
+		auto bestStreet = std::max_element(streets.begin(), streets.end());
+		bestStreet->build();
+		streets.erase(bestStreet);
 	}	
 
 	return 0;
