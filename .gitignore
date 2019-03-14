@@ -1,9 +1,9 @@
 **/input.txt
-!template/input.txt
+!template-ois/input.txt
 **/output.txt
-!template/output.txt
+!template-ois/output.txt
 
 *.exe
 
 **/.vscode/
-!template/.vscode/
+!template-ois/.vscode/
