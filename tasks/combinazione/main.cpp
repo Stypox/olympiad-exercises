@@ -29,13 +29,14 @@ int main() {
 	for(auto&& num : nums)
 		in>>num.m;
 
-	nums.back().low = numeric_limits<si>::min()/2;
+	nums.back().low = 0;
 	nums.back().up = nums.back().m;
 
 	for(int i = N-2; i >= 0; --i) {
-		nums[i].low = 2*nums[i].m - nums[i+1].up;
-		nums[i].up = min(nums[i].m, 2*nums[i].m - nums[i+1].low);
+		auto& el0 = nums[i], & el1 = nums[i+1];
+		el0.low = max(0L, 2*el0.m - el1.up);
+		el0.up = min(el0.m, 2*el0.m - el1.low);
 	}
 
-	out << nums[0].up-nums[0].low+1;
+	out << nums[0].up - 2*nums[0].m+nums[1].up + 1;
 }
