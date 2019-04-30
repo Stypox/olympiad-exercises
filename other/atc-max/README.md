@@ -1,0 +1,3 @@
+# Max number of towers in [Air Traffic Control (atc)](https://training.olinfo.it/#/task/ois_atc/statement)
+The problem asks to calculate the smallest number of towers needed to connect the upper-left corner to the lower-right corner of the square, and there could be obstacles in the way.
+This program tries to calculate the **maximum** number of towers that could be put in the `N*N` square while still respecting the rules (but obstacles are not considered).
