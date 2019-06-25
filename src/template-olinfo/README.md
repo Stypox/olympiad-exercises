@@ -10,5 +10,5 @@
 - A vscode configuration file "tasks.json" for tasks such as **build, run** and clean. Many compiler warnings are enabled;
 - `deb()` function for debugging, that prints only when `DEBUG` is `#define`d;
 - Everything needed to debug with `gdb`: vscode configuration file "launch.json", `-g` compiler option;
-<!--# [ ()](https://training.olinfo.it/#/task//statement)
+<!--# [ ($PROBLEM)](https://training.olinfo.it/#/task/$PROBLEM/statement)
 <!--Score: /100

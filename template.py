@@ -9,8 +9,7 @@ def create(source, problem):
 		readme = f"{destinationDir}README.md"
 		with open(readme, "r") as f: readmeCont = f.read()
 		readmeCont = "".join(readmeCont.split("<!--")[1:])
-		readmeCont = readmeCont.replace("task//statement", f"task/{problem}/statement")
-		readmeCont = readmeCont.replace("()]", f"({problem})]")
+		readmeCont = readmeCont.replace("$PROBLEM", f"{problem}")
 		with open(readme, "w") as f: f.write(readmeCont)
 	elif source in ["u", "uva"]:
 		destinationDir = f"./uva/{problem}/"
