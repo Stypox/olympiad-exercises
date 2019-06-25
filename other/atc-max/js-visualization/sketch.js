@@ -2,7 +2,7 @@ p5.disableFriendlyErrors = true;
 
 var canvasWidth = 1200;
 var canvasHeight = 800;
-var N = 5;
+var N = 8;
 var squareSize = Math.min(canvasWidth, canvasHeight)/N;
 
 var grid;
