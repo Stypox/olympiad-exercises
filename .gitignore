@@ -1,17 +1,17 @@
 **/input.txt
-!template-olinfo/input.txt
-!template-reply/input.txt
-!template-uva/input.txt
+!src/template-olinfo/input.txt
+!src/template-reply/input.txt
+!src/template-uva/input.txt
 **/output.txt
-!template-olinfo/output.txt
-!template-reply/output.txt
-!template-uva/output.txt
+!src/template-olinfo/output.txt
+!src/template-reply/output.txt
+!src/template-uva/output.txt
 
 *.exe
 
 **/.vscode/
-!template-olinfo/.vscode/
-!template-reply/.vscode/
-!template-uva/.vscode/
+!src/template-olinfo/.vscode/
+!src/template-reply/.vscode/
+!src/template-uva/.vscode/
 
 **/PDF/
