@@ -4,7 +4,7 @@
     "tasks": [
         {
             "label": "build and run",
-            "command": "echo '----------> Compiling...'; g++ -g -std=c++17 -Wall -Wextra -Wformat -Wdouble-promotion -Wchkp -Wpedantic -Wno-unknown-pragmas main.cpp -o main.exe && { echo '----------> Running...'; ./main.exe; echo '----------> Exit code: '$?; }",
+            "command": "echo '----------> Compiling...'; g++ -g -std=c++11 -Wall -Wextra -Wformat -Wdouble-promotion -Wchkp -Wpedantic -Wno-unknown-pragmas main.cpp -o main.exe && { echo '----------> Running...'; ./main.exe; echo '----------> Exit code: '$?; }",
             "type": "shell",
             "group": {
                 "kind": "build",

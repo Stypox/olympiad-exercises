@@ -9,8 +9,13 @@ using str = string;
 template<class T>
 using vec = vector<T>;
 
+#ifdef ONLINE_JUDGE
+istream& in = std::cin;
+ostream& out = std::cout;
+#else
 ifstream in{"input.txt"};
 ofstream out{"output.txt"};
+#endif
 
 int main() {
 	si T;
