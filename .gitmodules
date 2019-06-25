@@ -1,3 +1,3 @@
 [submodule "libs/uva-client"]
-	path = libs/uva-client
+	path = src/uva-client
 	url = https://github.com/Stypox/uva-client
