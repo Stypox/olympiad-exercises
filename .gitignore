@@ -1,12 +1,17 @@
 **/input.txt
 !template-olinfo/input.txt
 !template-reply/input.txt
+!template-uva/input.txt
 **/output.txt
 !template-olinfo/output.txt
 !template-reply/output.txt
+!template-uva/output.txt
 
 *.exe
 
 **/.vscode/
 !template-olinfo/.vscode/
 !template-reply/.vscode/
+!template-uva/.vscode/
+
+**/PDF/
