@@ -1,7 +1,8 @@
-import os, sys
+import os, sys, subprocess
 from distutils.dir_util import copy_tree
 
 def create(source, problem):
+	destinationDir = None
 	if source in ["o", "olinfo"]:
 		destinationDir = f"./olinfo/{problem}/"
 		copy_tree("./src/template-olinfo/", destinationDir)
@@ -21,6 +22,15 @@ def create(source, problem):
 		with open(tasks, "w") as f: f.write(tasksCont)
 	else:
 		print(f"Invalid source: {source}")
+		return
+	
+	programs = ["code", "vscodium", "atom"]
+	for program in programs:
+		try:
+			subprocess.check_output(["which", program])
+			os.system(f"{program} {destinationDir}")
+			break
+		except: pass
 
 def main(argv):
 	if len(argv) != 3:
