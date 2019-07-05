@@ -24,7 +24,7 @@ def create(source, problem):
 		print(f"Invalid source: {source}")
 		return
 	
-	programs = ["code", "vscodium", "atom"]
+	programs = ["code", "codium", "vscodium", "atom"]
 	for program in programs:
 		try:
 			subprocess.check_output(["which", program])
