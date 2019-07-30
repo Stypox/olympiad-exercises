@@ -40,7 +40,7 @@
         },
         {
             "label": "view",
-            "command": "codium -r $(python3 ../../src/uva-client/UVa.py download $PROBLEM)",
+            "command": "python3 ../../src/uva-client/UVa.py view $PROBLEM",
             "type": "shell",
             "group": "test",
             "presentation": {
