@@ -2,20 +2,17 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define inline inline __attribute__((always_inline))
-
 using si = int_fast32_t;
 using ui = uint_fast32_t;
 using ch = char;
 using str = string;
 template<class T>
 using vec = vector<T>;
-#define ONLINE_JUDGE
 #ifdef ONLINE_JUDGE
 istream& in = std::cin;
 ostream& out = std::cout;
-template<class... Ts> constexpr inline void deb(const Ts&...) {}
-template<class T, class P=str, class S=str> constexpr inline void debc(const T&, P="", S="") {}
+template<class... Ts> constexpr void deb(const Ts&...) {}
+template<class T, class P=str, class S=str> constexpr void debc(const T&, P="", S="") {}
 #else
 ifstream in{"input.txt"};
 ofstream out{"output.txt"};
@@ -24,70 +21,66 @@ template<class T, class P=str, class S=str> void debc(const T& t, P pre="", S se
 #endif
 
 struct SegmentTree {
-	vec<vec<ui>> layers;
-
-	inline SegmentTree(vec<ui>&& init) {
-		layers.emplace_back(init);
-
-		while(layers.back().size()!=1){
-			layers.push_back(vec<ui>(layers.back().size()/2 + layers.back().size()%2));
+	vec<ui> l;
+	ui n;
+	
+	void build(const ui i, const ui L, const ui R, const vec<ui>& init) {
+		if (L==R) {
+			l.at(i)=init.at(L);
+		} else {
+			build(2*i,     L,           (L+R)/2, init);
+			build(2*i + 1, (L+R)/2 + 1, R,       init);
+			l.at(i) = l.at(i*2) + l.at(i*2 + 1);
 		}
-		updateLayer(1,0,layers.at(1).size());
-		sdeb();
 	}
 
-	inline void updateLayer(const si i, const si a, const si b) {
-		if(i>=(si)layers.size()) return;
+	ui query(const ui i, const ui L, const ui R, const ui a, const ui b) {
+		if (L>b || R<a) return 0;
+		if (L>=a && R<=b) return l.at(i);
 
-		for(int p = a*2; p<2*b; p+=2) {
-			if(p==((si)layers.at(i-1).size()-1)){
-				layers.at(i).at(p/2)=layers.at(i-1).at(p);
-				break;
-			} else {
-				layers.at(i).at(p/2)=layers.at(i-1).at(p)+layers.at(i-1).at(p+1);
-			}
+		si s1 = query(i*2, L, (L+R)/2, a, b);
+		si s2 = query(i*2 + 1, (L+R)/2 + 1, R, a, b);
+		return s1+s2;
+	}
+
+	template<ui action>
+	void set(const ui i, const ui L, const ui R, const ui a, const ui b) {
+		if (L>b || R<a) {
+			return;
+		} else if (L==R) {
+			if (action==0)      l.at(i)=0;
+			else if (action==1) l.at(i)=1;
+			else                l.at(i)=!l.at(i);
+			return;
 		}
 
-		updateLayer(i+1,a/2,(b+1)/2);
+		set<action>(i*2, L, (L+R)/2, a, b);
+		set<action>(i*2 + 1, (L+R)/2 + 1, R, a, b);
+		l.at(i) = l.at(i*2) + l.at(i*2 + 1);
 	}
 
-	inline void sdeb() {
-	#ifndef ONLINE_JUDGE
-		for(int i = 0; i != layers.size(); ++i) {
-			debc(layers.at(i), "Layer " + to_string(i) + ": ", setw(std::pow(2,i)*2));
-		}
-	#endif
+public:
+	SegmentTree(const vec<ui>& init) : n{init.size()} {
+		l.resize(3*n, 0);
+		build(1, 0, n-1, init);
 	}
 
-	inline si boundLeft(const si l, const si section) {
-		return (1<<l)*section;
-	}
-	inline si boundRight(const si l, const si section) {
-		return min((1<<l)*(section+1)-1, (si)(layers.at(0).size()-1));
+	ui query(const ui a, const ui b) {
+		return query(1, 0, n-1, a, b);
 	}
 
-	si getr(const si l, const si section, const si a, const si b) {
-		si bl=boundLeft(l,section), br=boundRight(l,section);
-		if(a>br || b<bl) return 0;
-		if(bl>=a && br<=b) return layers.at(l).at(section);
-
-		si p1=getr(l-1, section*2,   a, b);
-		si p2=getr(l-1, section*2+1, a, b);
-
-		return p1+p2;
+	void set0(const ui a, const ui b) {
+		return set<0>(1, 0, n-1, a, b);
+	}
+	void set1(const ui a, const ui b) {
+		return set<1>(1, 0, n-1, a, b);
+	}
+	void invert(const ui a, const ui b) {
+		return set<2>(1, 0, n-1, a, b);
 	}
 
-	inline si getr(const si a, const si b) {
-		return getr(layers.size()-1,0,a,b);
-	}
-
-	template<class F>
-	inline void setr(const si a, const si b, const F& func) {
-		for(si i = a; i <= b; ++i) {
-			func(layers.at(0).at(i));
-		}
-		updateLayer(1,a/2,(b+2)/2);
-		sdeb();
+	void sdeb() {
+		debc(l, "SegmentTree data: ");
 	}
 };
 
@@ -118,27 +111,26 @@ int main() {
 			}
 		}
 
-		SegmentTree st{move(pirates)};
-		ui Q;
-		in>>Q;
+		SegmentTree st{pirates};
+		st.sdeb();
 
-		ui count=1;
+		ui Q, query=1;
+		in>>Q;
 		for(ui q = 0; q != Q; ++q) {
 			ch action;
 			ui a,b;
 			in>>action>>a>>b;
 
 			if(action=='F'){
-				st.setr(a,b,[](ui& v){v=1;});
+				st.set1(a,b);
 			} else if(action=='E'){
-				st.setr(a,b,[](ui& v){v=0;});
+				st.set0(a,b);
 			} else if(action=='I'){
-				st.setr(a,b,[](ui& v){v=!v;});
+				st.invert(a,b);
 			} else{
-				out<<"Q"<<count<<": "<<st.getr(a,b)<<"\n";
-				++count;
+				out<<"Q"<<query<<": "<<st.query(a,b)<<"\n";
+				++query;
 			}
 		}
-		deb();
 	}
 }
