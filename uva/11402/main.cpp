@@ -13,6 +13,7 @@ istream& in = std::cin;
 ostream& out = std::cout;
 template<class... Ts> constexpr void deb(const Ts&...) {}
 template<class T, class P=str, class S=str> constexpr void debc(const T&, P="", S="") {}
+#define at operator[]
 #else
 ifstream in{"input.txt"};
 ofstream out{"output.txt"};
@@ -20,48 +21,112 @@ void deb() {cout<<"\n";} template<class T, class... Ts> void deb(T t, Ts... args
 template<class T, class P=str, class S=str> void debc(const T& t, P pre="", S sep=" ") {cout<<pre;for(auto&& e:t)cout<<e<<sep;cout<<"\n";}
 #endif
 
+enum Action : char {
+	nothing=0,
+	set=1,
+	unset=2,
+	flip=3,
+};
+
 struct SegmentTree {
-	vec<ui> l;
 	ui n;
+	vec<ui> nodes;
+	vec<Action> actions;
 	
 	void build(const ui i, const ui L, const ui R, const vec<ui>& init) {
 		if (L==R) {
-			l.at(i)=init.at(L);
+			nodes.at(i)=init.at(L);
 		} else {
 			build(2*i,     L,           (L+R)/2, init);
 			build(2*i + 1, (L+R)/2 + 1, R,       init);
-			l.at(i) = l.at(i*2) + l.at(i*2 + 1);
+			nodes.at(i) = nodes.at(i*2) + nodes.at(i*2 + 1);
 		}
 	}
 
 	ui query(const ui i, const ui L, const ui R, const ui a, const ui b) {
+		applyAct(i, L, R);
 		if (L>b || R<a) return 0;
-		if (L>=a && R<=b) return l.at(i);
+		if (L>=a && R<=b) return nodes.at(i);
 
-		si s1 = query(i*2, L, (L+R)/2, a, b);
-		si s2 = query(i*2 + 1, (L+R)/2 + 1, R, a, b);
+		si s1 = query(i*2,      L,          (L+R)/2, a, b);
+		si s2 = query(i*2 + 1, (L+R)/2 + 1, R,       a, b);
 		return s1+s2;
 	}
 
-	template<ui action>
-	void set(const ui i, const ui L, const ui R, const ui a, const ui b) {
-		if (L>b || R<a) {
+	void change(Action& curr, Action action) {
+		if (action==Action::flip) {
+			switch(curr){
+			case Action::nothing:
+				curr=Action::flip;
+				break;
+			case Action::set:
+				curr=Action::unset;
+				break;
+			case Action::unset:
+				curr=Action::set;
+				break;
+			case Action::flip:
+				curr=Action::nothing;
+				break;
+			}
+		} else if (action!=Action::nothing) {
+			curr=action;
+		}
+	}
+
+	void applyAct(const ui i, const ui L, const ui R) {
+		Action& action = actions.at(i);
+		deb("apply",i,L,R,action);
+		
+		switch(action){
+		case Action::nothing:
+			action=Action::nothing;
 			return;
-		} else if (L==R) {
-			if (action==0)      l.at(i)=0;
-			else if (action==1) l.at(i)=1;
-			else                l.at(i)=!l.at(i);
+		case Action::set:
+			nodes.at(i) = R-L+1;
+			break;
+		case Action::unset:
+			nodes.at(i) = 0;
+			break;
+		case Action::flip:
+			nodes.at(i) = R-L+1-nodes.at(i);
+			break;
+		}
+		debc(nodes);
+
+		if (i*2<actions.size()) {
+			change(actions.at(i*2), action);
+			change(actions.at(i*2 + 1), action);
+		}
+		action=Action::nothing;
+	}
+
+	template<Action action>
+	void act(const ui i, const ui L, const ui R, const ui a, const ui b) {
+		deb("act",i,L,R);
+		if (L>b || R<a) {
+			applyAct(i, L, R);
 			return;
 		}
 
-		set<action>(i*2, L, (L+R)/2, a, b);
-		set<action>(i*2 + 1, (L+R)/2 + 1, R, a, b);
-		l.at(i) = l.at(i*2) + l.at(i*2 + 1);
+		if (L>=a && R<=b) {
+			deb("a");
+			change(actions.at(i), action);
+			applyAct(i, L, R);
+			return;
+		}
+		deb("b");
+		applyAct(i, L, R);
+
+		act<action>(i*2,     L,           (L+R)/2, a, b);
+		act<action>(i*2 + 1, (L+R)/2 + 1, R,       a, b);
+		nodes.at(i) = nodes.at(i*2) + nodes.at(i*2 + 1);
+		deb("c", i, nodes.at(i));
 	}
 
 public:
-	SegmentTree(const vec<ui>& init) : n{init.size()} {
-		l.resize(3*n, 0);
+	SegmentTree(const vec<ui>& init) :
+			n{init.size()}, nodes(4*n, 0), actions(4*n, Action::nothing) {
 		build(1, 0, n-1, init);
 	}
 
@@ -70,17 +135,18 @@ public:
 	}
 
 	void set0(const ui a, const ui b) {
-		return set<0>(1, 0, n-1, a, b);
+		return act<Action::unset>(1, 0, n-1, a, b);
 	}
 	void set1(const ui a, const ui b) {
-		return set<1>(1, 0, n-1, a, b);
+		return act<Action::set>(1, 0, n-1, a, b);
 	}
-	void invert(const ui a, const ui b) {
-		return set<2>(1, 0, n-1, a, b);
+	void flip(const ui a, const ui b) {
+		return act<Action::flip>(1, 0, n-1, a, b);
 	}
 
 	void sdeb() {
-		debc(l, "SegmentTree data: ");
+		debc(nodes,   "nodes:   ");
+		debc(actions, "actions: ");
 	}
 };
 
@@ -126,11 +192,14 @@ int main() {
 			} else if(action=='E'){
 				st.set0(a,b);
 			} else if(action=='I'){
-				st.invert(a,b);
+				st.flip(a,b);
 			} else{
 				out<<"Q"<<query<<": "<<st.query(a,b)<<"\n";
 				++query;
 			}
+			deb(action, a, b);
+			st.sdeb();
 		}
+		deb();
 	}
 }
