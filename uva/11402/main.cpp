@@ -1,103 +1,90 @@
+#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 using namespace std;
 
-using si = long long;
-using ui = unsigned long long;
-using flt = long double;
+#define inline inline __attribute__((always_inline))
+
+using si = int_fast32_t;
+using ui = uint_fast32_t;
 using ch = char;
 using str = string;
 template<class T>
 using vec = vector<T>;
-
+#define ONLINE_JUDGE
 #ifdef ONLINE_JUDGE
 istream& in = std::cin;
 ostream& out = std::cout;
-template<class... Ts> constexpr void deb(const Ts&...) {}
-template<class T> constexpr void debc(const T&, str="", str="") {}
+template<class... Ts> constexpr inline void deb(const Ts&...) {}
+template<class T, class P=str, class S=str> constexpr inline void debc(const T&, P="", S="") {}
 #else
 ifstream in{"input.txt"};
 ofstream out{"output.txt"};
 void deb() {cout<<"\n";} template<class T, class... Ts> void deb(T t, Ts... args) {cout<<t<<" ";deb(args...);}
-template<class T> constexpr void debc(const T& t, str pre="", str sep=" ") {cout<<pre;for(auto&& e:t)cout<<e<<sep;cout<<"\n";}
+template<class T, class P=str, class S=str> void debc(const T& t, P pre="", S sep=" ") {cout<<pre;for(auto&& e:t)cout<<e<<sep;cout<<"\n";}
 #endif
 
 struct SegmentTree {
-	vec<vec<si>> layers;
+	vec<vec<ui>> layers;
 
-	SegmentTree(const vec<si>& init) {
-		layers.push_back(init);
+	inline SegmentTree(vec<ui>&& init) {
+		layers.emplace_back(init);
 
 		while(layers.back().size()!=1){
-			layers.push_back(vec<si>(layers.back().size()/2 + layers.back().size()%2));
+			layers.push_back(vec<ui>(layers.back().size()/2 + layers.back().size()%2));
 		}
-		updateLayer(1,0,layers[1].size());
+		updateLayer(1,0,layers.at(1).size());
 		sdeb();
 	}
 
-	void updateLayer(si i, si a, si b) {
-		deb(i,a,b);
-		if(i>=layers.size()) return;
+	inline void updateLayer(const si i, const si a, const si b) {
+		if(i>=(si)layers.size()) return;
 
 		for(int p = a*2; p<2*b; p+=2) {
-			if(p<(layers[i-1].size()-1)){
-				layers[i][p/2]=layers[i-1][p]+layers[i-1][p+1];
-			} else if(p==(layers[i-1].size()-1)){
-				layers[i][p/2]=layers[i-1][p];
+			if(p==((si)layers.at(i-1).size()-1)){
+				layers.at(i).at(p/2)=layers.at(i-1).at(p);
 				break;
 			} else {
-				break;
+				layers.at(i).at(p/2)=layers.at(i-1).at(p)+layers.at(i-1).at(p+1);
 			}
 		}
 
 		updateLayer(i+1,a/2,(b+1)/2);
 	}
 
-	void sdeb() {
+	inline void sdeb() {
+	#ifndef ONLINE_JUDGE
 		for(int i = 0; i != layers.size(); ++i) {
-			debc(layers[i], "Layer " + to_string(i) + ": ");
+			debc(layers.at(i), "Layer " + to_string(i) + ": ", setw(std::pow(2,i)*2));
 		}
+	#endif
 	}
 
-	static si lowerMultiple(si b,si lsize){
-		if((b%lsize)==0) return b-lsize;
-		return b-(b%lsize);
+	inline si boundLeft(const si l, const si section) {
+		return (1<<l)*section;
+	}
+	inline si boundRight(const si l, const si section) {
+		return min((1<<l)*(section+1)-1, (si)(layers.at(0).size()-1));
 	}
 
-	si getr(si a, si b, si l) {
-		if(a>=b||b>layers[0].size())return 0;
-		si lsize=1<<l;
-		si half=lsize-(a%lsize)+a;
-		deb("l",l,"lsize",lsize,"half",half,"a,b",a,b);
+	si getr(const si l, const si section, const si a, const si b) {
+		si bl=boundLeft(l,section), br=boundRight(l,section);
+		if(a>br || b<bl) return 0;
+		if(bl>=a && br<=b) return layers.at(l).at(section);
 
-		if((a%lsize)==0){
-			deb("A");
-			if(b >= (a+lsize)){
-				deb("a");
-				return layers[l][a/lsize] + getr(half,b,l-1);
-			}
-		}
-		if((b%lsize)==0 || b==layers[0].size()){
-			deb("B",lowerMultiple(b,lsize));
-			if(a <= lowerMultiple(b,lsize)){
-				deb("b");
-				return getr(a,half,l-1) + layers[l][(b-!(b%lsize))/lsize];
-			}
-		}
+		si p1=getr(l-1, section*2,   a, b);
+		si p2=getr(l-1, section*2+1, a, b);
 
-		deb("C");
-		if(half>=b) return getr(a,b,l-1);
-		deb("D");
-		return getr(a,half,l-1) + getr(half,b,l-1);
+		return p1+p2;
 	}
 
-	si getr(si a, si b) {
-		return getr(a,b+1,layers.size()-1);
+	inline si getr(const si a, const si b) {
+		return getr(layers.size()-1,0,a,b);
 	}
 
 	template<class F>
-	void setr(si a, si b, F func) {
-		for(int i = a; i <= b; ++i) {
-			func(layers[0][i]);
+	inline void setr(const si a, const si b, const F& func) {
+		for(si i = a; i <= b; ++i) {
+			func(layers.at(0).at(i));
 		}
 		updateLayer(1,a/2,(b+2)/2);
 		sdeb();
@@ -105,50 +92,53 @@ struct SegmentTree {
 };
 
 int main() {
-	si T;
+	ui T;
 	in >> T;
 
-	for(int t = 0; t != T; ++t) {
+	for(ui t = 0; t != T; ++t) {
 		out<<"Case "<<t+1<<":\n";
-		si M;
+		ui M;
 		in>>M;
 		
-		vec<si> pirates;
-		for(int m = 0; m != M; ++m) {
-			si N;
-			str desc;
-			in>>N>>desc;
+		vec<ui> pirates;
+		for(ui m = 0; m != M; ++m) {
+			ui N;
+			in>>N;
+			in.ignore();
 
-			vec<si> curr;
-			for(auto&& ch : desc) {
-				curr.push_back((si)(ch=='1'));
+			vec<ui> curr;
+			ch c=in.get();
+			while(c!='\n') {
+				curr.push_back(c=='1');
+				c=in.get();
 			}
 
-			for(int n = 0; n != N; ++n) {
+			for(ui n = 0; n != N; ++n) {
 				pirates.insert(pirates.end(), curr.begin(), curr.end());
 			}
 		}
 
-		SegmentTree st{pirates};		
-		si Q;
+		SegmentTree st{move(pirates)};
+		ui Q;
 		in>>Q;
 
-		si count=1;
-		for(int q = 0; q != Q; ++q) {
+		ui count=1;
+		for(ui q = 0; q != Q; ++q) {
 			ch action;
-			si a,b;
+			ui a,b;
 			in>>action>>a>>b;
 
 			if(action=='F'){
-				st.setr(a,b,[](si& v){v=1;});
+				st.setr(a,b,[](ui& v){v=1;});
 			} else if(action=='E'){
-				st.setr(a,b,[](si& v){v=0;});
+				st.setr(a,b,[](ui& v){v=0;});
 			} else if(action=='I'){
-				st.setr(a,b,[](si& v){v=!v;});
+				st.setr(a,b,[](ui& v){v=!v;});
 			} else{
 				out<<"Q"<<count<<": "<<st.getr(a,b)<<"\n";
 				++count;
 			}
 		}
+		deb();
 	}
 }
