@@ -13,10 +13,12 @@ using vec = vector<T>;
 istream& in = std::cin;
 ostream& out = std::cout;
 template<class... Ts> constexpr void deb(const Ts&...) {}
+template<class T, class P=str, class S=str> constexpr void debc(const T&, P="", S="") {}
 #else
 ifstream in{"input.txt"};
 ofstream out{"output.txt"};
 void deb() {cout<<"\n";} template<class T, class... Ts> void deb(T t, Ts... args) {cout<<t<<" ";deb(args...);}
+template<class T, class P=str, class S=str> void debc(const T& t, P pre="", S sep=" ") {cout<<pre;for(auto&& e:t)cout<<e<<sep;cout<<"\n";}
 #endif
 
 int main() {
