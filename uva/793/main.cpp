@@ -49,7 +49,6 @@ int main() {
 			in.ignore();
 			deb(c,i,j);
 			debc(pcs);
-			deb(parent(3));
 
 			if(c=='c') {
 				pcs[parent(j)]=parent(i);
