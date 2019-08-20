@@ -21,58 +21,37 @@ void deb() {cout<<"\n";} template<class T, class... Ts> void deb(T t, Ts... args
 template<class T, class P=str, class S=str> void debc(const T& t, P pre="", S sep=" ") {cout<<pre;for(auto&& e:t)cout<<e<<sep;cout<<"\n";}
 #endif
 
-struct FTD {
-	map<si,si> counts;
-	FTD() = default;
+struct ST {
+	si N;
+	vec<si> data;
 
-	FTD operator+(const FTD& other) {
-		FTD ftd{};
-		ftd.counts = counts;
-		ftd += other;
-		return ftd;
-	}
-	void operator+=(const FTD& other) {
-		for(auto&& c : other.counts) {
-			counts[c.first] += c.second;
+	void build(si i, si L, si R, const vec<si>& init) {
+		if (L==R) {
+			data[i]=init[L];
+		} else {
+			build(i*2,   L,           (L+R)/2, init);
+			build(i*2+1, (L+R)/2 + 1, R,       init);
+			data[i] = max(data[i*2], data[i*2+1]);
 		}
 	}
 
-	FTD operator-(const FTD& other) {
-		FTD ftd{};
-		ftd.counts = counts;
-		ftd -= other;
-		return ftd;
-	}
-	void operator-=(const FTD& other) {
-		for(auto&& c : other.counts) {
-			counts[c.first] -= c.second;
-		}
-	}
-};
-
-constexpr si lsOne(si i) {
-	return i & (-i);
-}
-
-struct FenwickTree {
-	vec<FTD> data;
-
-	FenwickTree(si N) : data(N+1) {}
-	
-	FTD query(si i) {
-		FTD sum;
-		for(; i!=0; i-=lsOne(i))
-			sum += data[i];
-		return sum;
+	ST(const vec<si>& init) : N(init.size()), data(4*N+4) {
+		build(1, 0, N, init);
 	}
 
-	FTD query(si a, si b) {
-		return query(b) - query(a-1);
+	si query(si i, si L, si R, si a, si b) {
+		if (L>b || R<a) return -1;
+		if (L>=a && R<=b) return data[i];
+
+		si m1 = query(i*2,   L,           (L+R)/2, a, b);
+		si m2 = query(i*2+1, (L+R)/2 + 1, R,       a, b);
+		return max(m1, m2);
 	}
 
-	void set(si i, si val) {
-		for(; i<=data.size(); i+=lsOne(i))
-			data[i].counts[val]++;
+	si query(si a, si b) {
+		if (b<a) return -1;
+		if (a==b) return 1;
+		return query(1, 0, N, a-1, b-1);
 	}
 };
 
@@ -82,21 +61,41 @@ int main() {
 		in>>N>>Q;
 		if(N==0 || (!in)) break;
 
-		FenwickTree ft{N};
+		si lastv=222222, start=0;
+		vec<si> freq(N+1), borr(N+1), borl(N+1);
 		for(int n = 1; n <= N; ++n) {
 			si val;
 			in>>val;
-			ft.set(n, val);
-		}
+			if(val!=lastv) {
+				fill(freq.begin()+start, freq.begin()+n, n-start);
+				fill(borr.begin()+start, borr.begin()+n, n-1);
+				fill(borl.begin()+start, borl.begin()+n, start);
 
+				lastv=val;
+				start=n;
+			}
+		}
+		fill(freq.begin()+start, freq.end(), N-start+1);
+		fill(borr.begin()+start, borr.end(), N);
+		fill(borl.begin()+start, borl.end(), start);
+		debc(freq, "Freq: ");
+		debc(borr, "Borr: ");
+		debc(borl, "Borl: ");
+
+		ST st{vec<si>{freq.begin()+1, freq.end()}};
 		for(int q = 0; q != Q; ++q) {
 			si a,b;
 			in>>a>>b;
 
-			FTD res = ft.query(a,b);
-			si el = max_element(res.counts.begin(), res.counts.end(), [](const pair<si,si>& f1, const pair<si,si>& f2) { return f1.second < f2.second; })->second;
-
-			out<<el<<"\n";
+			si res;
+			si aAligned = borr[a]+1, bAligned = borl[b]-1;
+			if (aAligned-1>bAligned) {
+				res = b-a+1;
+			} else {
+				res = max({aAligned-a, b-bAligned, st.query(aAligned, bAligned)});
+			}
+			
+			out<<res<<"\n";
 		}
 	}
 }
