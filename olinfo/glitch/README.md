@@ -1,2 +1,2 @@
-# [ (glitch)](https://training.olinfo.it/#/task/glitch/statement)
-Score: /100
+# [Glitch (glitch)](https://training.olinfo.it/#/task/unimi_glitch/statement)
+Score: 0/100
