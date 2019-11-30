@@ -19,7 +19,7 @@ template<class... Ts> constexpr void deb(const Ts&...) {}
 template<class T, class P=str, class S=str> constexpr void debc(const T&, P="", S="") {}
 #endif
 
-constexpr ui P1=47, P2=53, M=1000000007;
+constexpr ui P1=47, P2=59, M=100000007;
 
 template<ui P>
 array<ui, 50010> powP() {
@@ -42,8 +42,9 @@ ui getHash(const char* s, si l) {
 
 template<ui P>
 ui moveHash(ui h, si l, char removed, char added) {
-	ui power=(P==P1 ? powP1[l-1] : powP2[l-1]);
-	return ((((h - removed*power)%M)*P)%M + added%M)%M;
+	ui power=(P==P1 ? powP1[l] : powP2[l]);
+	deb(h*P, removed*power, (int)added);
+	return (M + h*P - (removed*power)%M + added)%M;
 }
 
 vec<hash_t> getHashes(const char* s, si N, si l){
@@ -79,14 +80,16 @@ bool hasDuplicates(vec<hash_t>& hashes) {
 	return false;
 }
 
+#ifdef DEBUG
 void prHashes(const vec<hash_t>& hashes) {
 	for(auto&& h:hashes) cout<<"{"<<h.first<<" "<<h.second<<"}  "; cout<<"\n";
 }
+#endif
 
 int main() {
 	si N; str s;
 	in>>N>>s;
-	for(char chr:s) chr-='a';
+	for(char& chr:s) chr-='a', deb((int)chr);
 	
 	si a=0,b=N;
 	while(1){
@@ -95,7 +98,7 @@ int main() {
 		deb(a,b,l, powP1[l-1], powP2[l-1]);
 
 		vec<hash_t> hashes=getHashes(s.c_str(),N,l);
-		prHashes(hashes); prHashes(getHashesBrutto(s.c_str(),N,l));
+		//prHashes(hashes); prHashes(getHashesBrutto(s.c_str(),N,l));
 
 		if(hasDuplicates(hashes)) {
 			deb("yes!\n");
@@ -106,5 +109,6 @@ int main() {
 		}
 	}
 
+	deb(moveHash<P1>(19, 2, 18, 11));
 	out<<a<<"\n";
 }
