@@ -19,40 +19,41 @@ template<class... Ts> constexpr void deb(const Ts&...) {}
 template<class T, class P=str, class S=str> constexpr void debc(const T&, P="", S="") {}
 #endif
 
-struct Node {
-	si dist=numeric_limits<si>::max();
-	vec<pair<si, si>> conn;
-};
+template<class T>
+void print(T beg, T end) {
+	while(beg!=end) {
+		cout<<get<0>(*beg)<<":"<<get<1>(*beg)<<":"<<get<2>(*beg)<<" ";
+		++beg;
+	}
+	cout<<"\n";
+}
 
 int main() {
-	si N,M,A,B;
-	in>>N>>M>>A>>B; A--; B--;
+	si N;
+	in>>N;
 
-	vec<Node> nodes(N);
-	for(si m = 0; m != M; ++m) {
-		si a,b,w;
-		in>>a>>b>>w; a--; b--;
-		nodes[a].conn.push_back({b,w});
+	vec<tuple<si, si, si>> pos(N);
+	for(si n = 0; n != N; ++n) {
+		in>>get<0>(pos[n])>>get<2>(pos[n]);
+		get<0>(pos[n]) += get<2>(pos[n]);
+		get<1>(pos[n]) = n;
 	}
+	//print(pos.begin(), pos.end());
 
-	priority_queue<pair<si,si>, vector<pair<si,si>>, greater<pair<si, si>>> pq;
-	nodes[A].dist = 0;
-	pq.push({0, A});
+	si n=N;
+	si beg=0;
+	while(n!=1) {
+		n/=2;
+		nth_element(pos.begin()+beg, pos.begin()+beg+n, pos.end());
+		//print(pos.begin() + beg, pos.end());
+		beg+=n;
 
-	while(!pq.empty()) {
-		auto [dist, i] = pq.top();
-		pq.pop();
-
-		if (dist != nodes[i].dist) continue;
-		deb(dist, i);
-
-		for(auto [to, w] : nodes[i].conn) {
-			if (dist + w < nodes[to].dist) {
-				nodes[to].dist = dist + w;
-				pq.push({nodes[to].dist, to});
-			}
+		//cout<<"\n";
+		for (si a=beg; a!=pos.size(); ++a) {
+			get<0>(pos[a]) += get<2>(pos[a]);
 		}
+		//print(pos.begin() + beg, pos.end());
 	}
 
-	out<<nodes[B].dist;
+	out<<get<1>(pos[beg]);
 }

@@ -19,40 +19,25 @@ template<class... Ts> constexpr void deb(const Ts&...) {}
 template<class T, class P=str, class S=str> constexpr void debc(const T&, P="", S="") {}
 #endif
 
-struct Node {
-	si dist=numeric_limits<si>::max();
-	vec<pair<si, si>> conn;
-};
-
-int main() {
-	si N,M,A,B;
-	in>>N>>M>>A>>B; A--; B--;
-
-	vec<Node> nodes(N);
-	for(si m = 0; m != M; ++m) {
-		si a,b,w;
-		in>>a>>b>>w; a--; b--;
-		nodes[a].conn.push_back({b,w});
+long long solve(int N, int*M, int*P) {
+	vec<pair<int, int>> cose;
+	for(int n = 0; n != N; ++n) {
+		cose.emplace_back(M[n] - P[n], n);
 	}
 
-	priority_queue<pair<si,si>, vector<pair<si,si>>, greater<pair<si, si>>> pq;
-	nodes[A].dist = 0;
-	pq.push({0, A});
+	nth_element(cose.begin(), cose.begin() + N/2, cose.end());
 
-	while(!pq.empty()) {
-		auto [dist, i] = pq.top();
-		pq.pop();
-
-		if (dist != nodes[i].dist) continue;
-		deb(dist, i);
-
-		for(auto [to, w] : nodes[i].conn) {
-			if (dist + w < nodes[to].dist) {
-				nodes[to].dist = dist + w;
-				pq.push({nodes[to].dist, to});
-			}
-		}
+	long long tot=0;
+	for(int n = 0; n != N/2; ++n) {
+		tot+=P[cose[n].second];
+		tot+=M[cose[n + N/2].second];
 	}
-
-	out<<nodes[B].dist;
+	return tot;
 }
+/*
+int main() {
+	int a[] {0,0,0,1,1,1,1,1};
+	int b[] {1,1,1,1,1,1,0,0};
+	cout<<solve(8, a, b)<<"\n";
+}
+*/
