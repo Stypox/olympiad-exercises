@@ -2,12 +2,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-using si = long long;
-using ui = unsigned long long;
-using flt = long double;
-using ch = char;
-using str = string;
-template <typename T> using vec = vector<T>;
+#define int int64_t
+#define float long double
 
 ifstream in{"input.txt"};
 ofstream out{"output.txt"};
@@ -19,6 +15,6 @@ template<class... Ts> constexpr void deb(const Ts&...) {}
 template<class T, class P=str, class S=str> constexpr void debc(const T&, P="", S="") {}
 #endif
 
-int main() {
+int32_t main() {
 	
 }
