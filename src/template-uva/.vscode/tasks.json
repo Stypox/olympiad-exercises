@@ -40,7 +40,7 @@
         },
         {
             "label": "view",
-            "command": "python3 ../../src/uva-client/UVa.py view $PROBLEM",
+            "command": "python3 ../../src/uva-client/UVa.py view $PROBLEM vscode",
             "type": "shell",
             "group": "test",
             "presentation": {
