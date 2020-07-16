@@ -1,95 +1,96 @@
+#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 using namespace std;
 
-using si = long long;
-using ui = unsigned long long;
-using flt = long double;
-using ch = char;
-using str = string;
-template<class T>
-using vec = vector<T>;
+#define int int64_t
+#define float long double
 
 #ifdef ONLINE_JUDGE
 istream& in = std::cin;
 ostream& out = std::cout;
 template<class... Ts> constexpr void deb(const Ts&...) {}
-template<class T, class P=str, class S=str> constexpr void debc(const T&, P="", S="") {}
+template<class T, class P=string, class S=string> constexpr void debc(const T&, P="", S="") {}
 #else
 ifstream in{"input.txt"};
 ofstream out{"output.txt"};
 void deb() {cout<<"\n";} template<class T, class... Ts> void deb(T t, Ts... args) {cout<<t<<" ";deb(args...);}
-template<class T, class P=str, class S=str> void debc(const T& t, P pre="", S sep=" ") {cout<<pre;for(auto&& e:t)cout<<e<<sep;cout<<"\n";}
+template<class T, class P=string, class S=string> void debc(const T& t, P pre="", S sep=" ") {cout<<pre;for(auto&& e:t)cout<<e<<sep;cout<<"\n";}
 #endif
 
 struct Chess {
-	si N;
-	vec<vec<bool>> used;
+	int N, r;
+	vector<vector<bool>> bad;
+	vector<int> queens; // queens[row] = column
+	vector<bool> columnsUsed;
+	vector<bool> diagonals1Used;
+	vector<bool> diagonals2Used;
 
-	Chess(si N_) : N{N_}, used(N, vec<bool>(N, false)) {}
+	Chess(int N) : N{N},
+		r{0},
+		bad(N, vector<bool>(N, false)),
+		queens(N),
+		columnsUsed(N, false),
+		diagonals1Used(2*N - 1, false),
+		diagonals2Used(2*N - 1, false) {}
 
-	void setBad(si r, si c) {
-		used[r][c] = true;
+	void setBad(int r, int c) {
+		bad[r][c] = true;
 	}
 
-	void setQueen(si r, si c) {
-		for(si rm = r-1; rm >= 0; --rm) {
-			used[rm][c] = true;
-			if (c+rm-r >= 0) used[rm][c+rm-r] = true;
-			if (c-rm+r < N)  used[rm][c-rm+r] = true;
-		}
-		for(int rm = r+1; rm < N; ++rm) {
-			used[rm][c] = true;
-			if (c-rm+r >= 0) used[rm][c-rm+r] = true;
-			if (c+rm-r < N)  used[rm][c+rm-r] = true;
-		}
-		for(int cm = 0; cm != N; ++cm) {
-			used[r][cm] = true;
-		}
+	bool canQueenBeAddedAt(int c) {
+		return !(bad[r][c] || columnsUsed[c] || diagonals1Used[c+r] || diagonals2Used[N-1-c+r]);
 	}
 
-	void db() {
-		for(auto&& column : used) {
-			debc(column);
-		}
+	void addQueen(int c) {
+		queens[r]=c;
+		columnsUsed[c]=true;
+		diagonals1Used[c+r]=true;
+		diagonals2Used[N-1-c+r]=true;
+		++r;
+	}
+
+	void removeQueen(int c) {
+		--r;
+		// no need to change value of queens[r]
+		columnsUsed[c]=false;
+		diagonals1Used[c+r]=false;
+		diagonals2Used[N-1-c+r]=false;
 	}
 };
 
-si soln;
-
-void run(Chess chess, si coln) {
-	if (coln >= chess.N) {
-		++soln;
-		return;
+int run(Chess& chess) {
+	if (chess.r >= chess.N) {
+		return 1;
 	}
 	
-	for(int rown = 0; rown != chess.N; ++rown) {
-		if (!chess.used[rown][coln]) {
-			Chess newChess = chess;
-			newChess.setQueen(rown, coln);
-			run(newChess, coln+1);
+	int solutions = 0;
+	for(int c = 0; c != chess.N; ++c) {
+		if (chess.canQueenBeAddedAt(c)) {
+			chess.addQueen(c);
+			solutions += run(chess);
+			chess.removeQueen(c);
 		}
 	}
+	return solutions;
 }
 
-int main() {
-	si t=0;
+int32_t main() {
+	int t=0;
 	while(1) {
-		soln = 0;
-		si N;
+		int N;
 		in>>N;
 		if(N==0) break;
 		
 		Chess chess{N};
 		for(int r = 0; r != N; ++r) {
-			str tmp;
+			string tmp;
 			in>>tmp;
 			for(int c = 0; c != N; ++c)
 				if (tmp[c] == '*')
 					chess.setBad(r, c);
 		}
 
-		run(chess, 0);
 		++t;
-		out<<"Case "<<t<<": "<<soln<<"\n";
+		out<<"Case "<<t<<": "<<run(chess)<<"\n";
 	}
 }
