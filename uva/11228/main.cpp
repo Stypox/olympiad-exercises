@@ -27,7 +27,7 @@ struct Edge{
 	float dist;
 
 	Edge(int a, int b, const vector<City>& c) : a{a}, b{b},
-		dist{sqrt((c[a].x-c[b].x)*(c[a].x-c[b].x) + (c[a].y-c[b].y)*(c[a].y-c[b].y))} {}
+		dist{hypotl(c[a].x-c[b].x, c[a].y-c[b].y)} {}
 
 	bool operator<(const Edge& other) {
 		return dist < other.dist;
@@ -49,7 +49,6 @@ int32_t main() {
 
 
 		function<int(int)> findRoot = [&](int i) -> int {
-			deb(i, cities[i].parent);
 			if (cities[i].parent == -1) return i;
 			return findRoot(cities[i].parent);
 		};
