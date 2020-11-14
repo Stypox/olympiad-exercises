@@ -25,17 +25,14 @@ struct Range {
         assert(yfrom < yto);
     }
 
-    int size() const {
-        return yto-yfrom;
-    }
-    int containsCompletely(int yfrom1, int yto1) const {
-        assert(yfrom1 < yto1);
-        return yfrom1 >= yfrom && yto1 <= yto;
-    }
-    void printa() {
-        cerr<<yfrom<<" "<<yto<<" "<<x<<"\n";
+    int lunghezza() const {
+        return yto - yfrom;
     }
 };
+
+bool comp(Point& a, Point& b) {
+    return a.y < b.y;
+}
 
 int32_t main() {
 	int N;
@@ -46,9 +43,11 @@ int32_t main() {
         in>>points[n].x>>points[n].y;
     }
 
-    auto it = min_element(points.begin(), points.end(), [](Point&a,Point&b){return a.y < b.y;});
+    auto it = min_element(points.begin(), points.end(), comp);
     if (it == points.begin()) {
         if (points[0].y != points[1].y) {
+            // quindi il primo punto deve essere uguale all'ultimo
+            // --> muovi l'ultimo punto all'inizio
             vector<Point> newPoints {points.back()};
             newPoints.insert(newPoints.end(), points.begin(), points.end() - 1);
             points = newPoints;
@@ -72,7 +71,7 @@ int32_t main() {
                     Range& r = ranges.back();
                     if (points[i+1].y <= r.yfrom) {
                         // prendilo tutto
-                        area += r.size() * (points[i].x - r.x);
+                        area += r.lunghezza() * (points[i].x - r.x);
                         ranges.pop_back();
                     } else {
                         // prendine parte
