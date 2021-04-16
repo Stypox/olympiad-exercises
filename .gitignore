@@ -1,8 +1,8 @@
-**/input.txt
+**/*input*.txt
 !src/template-olinfo/input.txt
 !src/template-reply/input.txt
 !src/template-uva/input.txt
-**/output.txt
+**/*output*.txt
 !src/template-olinfo/output.txt
 !src/template-reply/output.txt
 !src/template-uva/output.txt
