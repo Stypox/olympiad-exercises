@@ -1,3 +1,4 @@
+#pragma GCC optimize("O3")
 #include<bits/stdc++.h>
 using si = int64_t;
 using namespace std;
