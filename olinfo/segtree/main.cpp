@@ -1,8 +1,15 @@
 #pragma GCC optimize ("Ofast")
 #include <vector>
 #include <limits>
+#include <optional>
+#ifndef EVAL
+#include <string>
+#include <iostream>
+#include <iomanip>
+#endif
 using namespace std;
 
+#define inline __attribute__((always_inline)) inline
 using ll=long long;
 
 enum class Mode : char { none, add, set };
@@ -16,14 +23,11 @@ struct Node {
 };
 
 int greaterPow2(int i) {
-   if ((i^(i-1)) == (2*i-1)) return i;
-
-   int j=0;
-   while(i!=0) {
-      j++;
-      i>>=1;
+   int j=1;
+   while (j<i) {
+      j*=2;
    }
-   return 1<<j;
+   return j;
 }
 
 struct SegmentTree {
@@ -104,7 +108,6 @@ struct SegmentTree {
    }
 
    void lazyAdd(int l, int r, ll x, int a, int b, int i) {
-      //cout<<a<<" "<<b<<" "<<i<<endl;
       if (a>=r || b<=l) return;
       lazyProp(a, b, i);
 
@@ -138,9 +141,19 @@ struct SegmentTree {
       setup(i);
    }
 
-   __attribute__((always_inline)) inline int a0() { return 0; }
-   __attribute__((always_inline)) inline int b0() { return dat.size()/2; }
-   __attribute__((always_inline)) inline int i0() { return 1; }
+   int lowerBound(int l, int r, ll x, int a, int b, int i) {
+      if (a>=r || b<=l || dat[i].min > x) return -1;
+      if (b-a == 1) return a;
+      lazyProp(a, b, i);
+
+      int left = lowerBound(l, r, x, a, (a+b)/2, i*2);
+      if (left != -1) return left;
+      return lowerBound(l, r, x, (a+b)/2, b, i*2+1);
+   }
+
+   inline int a0() { return 0; }
+   inline int b0() { return dat.size()/2; }
+   inline int i0() { return 1; }
    void print() {
       #ifndef EVAL
       cout<<"\n";
@@ -169,40 +182,27 @@ struct SegmentTree {
 
 SegmentTree st;
 
-void init(vector<long long> a) {
+void init(vector<ll> a) {
    st = SegmentTree(a);
 }
 
-long long get_min(int l, int r) {
+ll get_min(int l, int r) {
    return st.queryMin(l, r, st.a0(), st.b0(), st.i0());
 }
 
-long long get_sum(int l, int r) {
+ll get_sum(int l, int r) {
    return st.querySum(l, r, st.a0(), st.b0(), st.i0());
 }
 
-void add(int l, int r, long long x) {
+void add(int l, int r, ll x) {
    st.lazyAdd(l, r, x, st.a0(), st.b0(), st.i0());
 }
 
-void set_range(int l, int r, long long x) {
+void set_range(int l, int r, ll x) {
    st.lazySet(l, r, x, st.a0(), st.b0(), st.i0());
 }
 
-int lower_bound(int l, int r, long long x) {
-   while(r-l != 1) {
-      int m = (r+l)/2;
-      ll vl = st.queryMin(l, m, st.a0(), st.b0(), st.i0());
-      if (vl <= x) {
-         r = m;
-      } else {
-         l = m;
-      }
-   }
-
-   if (st.queryMin(l, r, st.a0(), st.b0(), st.i0()) <= x) {
-      return l;
-   }
-   return -1;
+int lower_bound(int l, int r, ll x) {
+   return st.lowerBound(l, r, x, st.a0(), st.b0(), st.i0());
 }
 
