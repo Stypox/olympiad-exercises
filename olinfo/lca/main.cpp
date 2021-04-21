@@ -3,13 +3,15 @@ using namespace std;
 using ll=long long;
 
 struct arco {
-    int to, w8;
+   int to, w8;
 };
 
 struct nodo {
    array<int, 20> antenati;
    array<ll, 20> dist;
    array<ll, 20> minarco;
+
+   array<ll, 20> maxDown, maxUp, maxMiddle;
 
    vector<arco> figli;
    int altezza;
@@ -19,9 +21,9 @@ vector<nodo> albero;
 
 int lift(int v, int h) {
    for(int e=20; e>=0; e--) {
-       if(h & (1<<e)) {
-          v = albero[v].antenati[e];
-       }
+      if(h & (1<<e)) {
+         v = albero[v].antenati[e];
+      }
    }
    return v;
 }
@@ -46,6 +48,18 @@ ll minarco(int v, int h) {
       }
    }
    return res;
+}
+
+pair<ll, ll> maxUpMiddle(int v, int h) {
+   ll maxUp = 0, maxMiddle = 0;
+   for(int e=20; e>=0; e--) {
+      if(h & (1<<e)) {
+         maxMiddle = max({maxMiddle, maxUp + albero[v].maxDown[e], albero[v].maxMiddle[e]});
+         maxUp = max(maxUp + albero[v].dist[e], albero[v].maxUp[e]);
+         v = albero[v].antenati[e];
+      }
+   }
+   return {maxUp, maxMiddle};
 }
 
 int lca(int u, int v) {
@@ -81,6 +95,10 @@ void inizia(int N, int, int A[], int B[], int C[]) {
       albero[i].dist[0] = d;
       albero[i].minarco[0] = d;
 
+      albero[i].maxDown[0] = max(0, d);
+      albero[i].maxUp[0] = max(0, d);
+      albero[i].maxMiddle[0] = max(0, d);
+
       albero[i].altezza = h;
       albero[i].figli.erase(remove_if(albero[i].figli.begin(), albero[i].figli.end(), [&p](const arco& a) { return a.to == p; }), albero[i].figli.end());
       for(auto [to, w8] : albero[i].figli) {
@@ -97,6 +115,10 @@ void inizia(int N, int, int A[], int B[], int C[]) {
          albero[i].antenati[e] = albero[half].antenati[e-1];
          albero[i].dist[e] = albero[i].dist[e-1] + albero[half].dist[e-1];
          albero[i].minarco[e] = min(albero[i].minarco[e-1], albero[half].minarco[e-1]);
+
+         albero[i].maxDown[e] = max(albero[i].maxDown[e-1], albero[i].dist[e-1] + albero[half].maxDown[e-1]);
+         albero[i].maxUp[e] = max(albero[half].maxUp[e-1], albero[i].maxUp[e-1] + albero[half].dist[e-1]);
+         albero[i].maxMiddle[e] = max({albero[i].maxMiddle[e-1], albero[half].maxMiddle[e-1], albero[i].maxUp[e-1] + albero[half].maxDown[e-1]});
       }
    }
 }
@@ -119,5 +141,11 @@ long long int minimo(int u, int v) {
 }
 
 long long int massimo(int u, int v) {
-   return 123456789123ll+u-v;
+   int ca = lca(u, v);
+   int hca = albero[ca].altezza;
+
+   auto [uMaxUp, uMaxMiddle] = maxUpMiddle(u, albero[u].altezza-hca);
+   auto [vMaxUp, vMaxMiddle] = maxUpMiddle(v, albero[v].altezza-hca);
+
+   return max({uMaxMiddle, vMaxMiddle, uMaxUp + vMaxUp});
 }
