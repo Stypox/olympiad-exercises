@@ -2,7 +2,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define int int64_t
+#define int int32_t
 #define float long double
 
 ifstream in{"input.txt"};
