@@ -12,9 +12,10 @@ def copyTreeCheck(source, destination):
 
 def create(source, problem):
 	destinationDir = None
-	if source in ["o", "olinfo"]:
+	if source in ["o", "olinfo", "og", "olinfo-grader"]:
+		sourceDir = "./src/template-olinfo" + ("/" if source in ["o", "olinfo"] else "-grader/")
 		destinationDir = f"./olinfo/{problem}/"
-		written = copyTreeCheck("./src/template-olinfo/", destinationDir)
+		written = copyTreeCheck(sourceDir, destinationDir)
 
 		if written:
 			readme = f"{destinationDir}README.md"
@@ -34,7 +35,7 @@ def create(source, problem):
 	else:
 		print(f"Invalid source: {source}")
 		return
-	
+
 	programs = ["code", "codium", "vscodium", "atom"]
 	for program in programs:
 		try:
@@ -45,7 +46,7 @@ def create(source, problem):
 
 def main(argv):
 	if len(argv) != 3:
-		print("Usage: template.py [o|olinfo|u|uva] PROBLEM")
+		print("Usage: template.py [o|olinfo|og|olinfo-grader|u|uva] PROBLEM")
 	else:
 		create(argv[1], argv[2])
 

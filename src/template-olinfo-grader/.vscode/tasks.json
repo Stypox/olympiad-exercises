@@ -1,0 +1,53 @@
+{
+    "label": "build, run, clean",
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build and run",
+            "command": "echo '----------> Compiling...'; g++ -g -O0 -DDEBUG -std=c++11 -Wall -Wextra -Wformat -Wdouble-promotion -Wpedantic -Wno-unknown-pragmas main.cpp grader.cpp -o main.exe && { echo '----------> Running...'; ./main.exe; echo '----------> Exit code: '$?; }",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "echo": true
+            }
+        },
+        {
+            "label": "run",
+            "command": "echo '----------> Running...'; ./main.exe; echo '----------> Exit code: '$?",
+            "type": "shell",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "echo": true
+            }
+        },
+        {
+            "label": "clean",
+            "command": "echo '----------> Cleaning...'; rm main.exe && echo '----------> Cleaned'",
+            "type": "shell",
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "echo": true
+            }
+        },
+        {
+            "label": "update",
+            "command": "",
+            "type": "shell",
+            "group": "test",
+            "presentation": {
+                "reveal": "never",
+                "panel": "dedicated",
+                "echo": true
+            }
+        }
+    ]
+}

@@ -1,11 +1,13 @@
 **/*input*.txt
 !src/template-olinfo/input.txt
-!src/template-reply/input.txt
+!src/template-olinfo-grader/input.txt
 !src/template-uva/input.txt
+!src/template-reply/input.txt
 **/*output*.txt
 !src/template-olinfo/output.txt
-!src/template-reply/output.txt
+!src/template-olinfo-grader/output.txt
 !src/template-uva/output.txt
+!src/template-reply/output.txt
 
 *.out
 *.exe
@@ -14,7 +16,8 @@
 
 **/.vscode/
 !src/template-olinfo/.vscode/
-!src/template-reply/.vscode/
+!src/template-olinfo-grader/.vscode/
 !src/template-uva/.vscode/
+!src/template-reply/.vscode/
 
 **/PDF/
