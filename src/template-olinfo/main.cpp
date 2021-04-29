@@ -8,13 +8,11 @@ using namespace std;
 ifstream in{"input.txt"};
 ofstream out{"output.txt"};
 #ifdef DEBUG
-template<class A, class B> ostream& operator<<(ostream& o, const pair<A, B>& p) {cout<<"("<<p.first<<", "<<p.second<<")";return o;}
-template<class T> ostream& operator<<(ostream& o, const vector<T>& v) {cout<<"[";for(size_t i=0;i<v.size();++i){if(i!=0){cout<<", ";}cout<<v[i];}cout<<"]";return o;}
-void deb() {cout<<"\n";} template<class T, class... Ts> void deb(T t, Ts... args) {cout<<t<<" ";deb(args...);}
-template<class T, class P=string, class S=string> void debc(const T& t, P pre="", S sep=" ") {cout<<pre;for(auto&& e:t)cout<<e<<sep;cout<<"\n";}
+template<class A,class B>ostream&operator<<(ostream&o,const pair<A,B>&p){cout<<"("<<p.first<<", "<<p.second<<")";return o;}
+template<typename T>struct is_iterable{template<class E>static int16_t f(...);template<class E>static int8_t f(int8_t,typename E::const_iterator=E().end());enum{value=sizeof(f<T>(0))==sizeof(int8_t)};};template<class T,typename enable_if<is_iterable<T>::value,bool>::type=false>ostream&operator<<(ostream&o,const T&v){cout<<"[";for(auto it=v.begin();it!=v.end();++it){if(it!=v.begin()){cout<<", ";}cout<<*it;}cout<<"]";return o;}
+void deb(){cout<<"\n";}template<class T,class... Ts>void deb(T t,Ts... args) {cout<<t<<"  ";deb(args...);}
 #else
-template<class... Ts> constexpr void deb(const Ts&...) {}
-template<class T, class P=string, class S=string> constexpr void debc(const T&, P="", S="") {}
+template<class...Ts>constexpr void deb(const Ts&...){}
 #endif
 
 signed main() {
