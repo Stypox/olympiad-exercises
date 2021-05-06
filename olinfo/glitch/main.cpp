@@ -51,19 +51,10 @@ vec<hash_t> getHashes(const char* s, si N, si l){
 	vec<hash_t> res;
 	res.push_back({getHash<P1>(s,l), getHash<P2>(s,l)});
 
-	for(si n=0;n<(N-l-1);++n){
+	for(si n=0;n<(N-l);++n){
 		auto[h1,h2]=res.back();
 		res.push_back({moveHash<P1>(h1,l,s[n],s[n+l]),
 		               moveHash<P2>(h2,l,s[n],s[n+l])});
-	}
-
-	return res;
-}
-
-vec<hash_t> getHashesBrutto(const char* s, si N, si l){
-	vec<hash_t> res;
-	for(si n=0;n<(N-l);++n){
-		res.push_back({getHash<P1>(s+n,l), getHash<P2>(s+n,l)});
 	}
 
 	return res;
@@ -81,6 +72,15 @@ bool hasDuplicates(vec<hash_t>& hashes) {
 }
 
 #ifdef DEBUG
+vec<hash_t> getHashesBrutto(const char* s, si N, si l){
+	vec<hash_t> res;
+	for(si n=0;n<(N-l);++n){
+		res.push_back({getHash<P1>(s+n,l), getHash<P2>(s+n,l)});
+	}
+
+	return res;
+}
+
 void prHashes(const vec<hash_t>& hashes) {
 	for(auto&& h:hashes) cout<<"{"<<h.first<<" "<<h.second<<"}  "; cout<<"\n";
 }
@@ -90,10 +90,9 @@ int main() {
 	si N; str s;
 	in>>N>>s;
 	for(char& chr:s) chr-='a', deb((int)chr);
-	
+
 	si a=0,b=N;
-	while(1){
-		if (a==(b-1)) break;
+	while(a!=(b-1)){
 		si l = (a+b)/2;
 		deb(a,b,l, powP1[l-1], powP2[l-1]);
 
