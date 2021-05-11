@@ -2,134 +2,107 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-using si = long long;
-using ui = unsigned long long;
-using flt = long double;
-using ch = char;
-using str = string;
-template <typename T> using vec = vector<T>;
-
-ifstream in{"input.txt"};
-ofstream out{"output.txt"};
 #ifdef DEBUG
-void deb() {cout<<"\n";} template<class T, class... Ts> void deb(T t, Ts... args) {cout<<t<<" ";deb(args...);}
-template<class T, class P=str, class S=str> void debc(const T& t, P pre="", S sep=" ") {cout<<pre;for(auto&& e:t)cout<<e<<sep;cout<<"\n";}
+template<class A,class B>ostream&operator<<(ostream&o,const pair<A,B>&p){cout<<"("<<p.first<<", "<<p.second<<")";return o;}
+template<class T,typename=typename enable_if<!is_same<T, string>::value,decltype(*begin(declval<T>()))>::type>ostream&operator<<(ostream&o,const T&v){cout<<"[";for(auto it=v.begin();it!=v.end();++it){if(it!=v.begin()){cout<<", ";}cout<<*it;}cout<<"]";return o;}
+void deb(){cout<<"\n";}template<class T,class...Ts>void deb(const T&t,const Ts&...args){cout<<t;if(sizeof...(args)!=0){cout<<"  ";}deb(args...);}
 #else
-template<class... Ts> constexpr void deb(const Ts&...) {}
-template<class T, class P=str, class S=str> constexpr void debc(const T&, P="", S="") {}
+#define deb(...)
 #endif
 
-struct Node {
-	si parent;
-	si brig;
-	vec<si> children;
+#define BINARY_LIFTING_SIZE 17
 
-	vec<si> stNodes, stMax;
-	si tin,tout;
+struct Node{
+	int brig;
+	vector<int> chi;
+	array<int, BINARY_LIFTING_SIZE> par;
+	array<int, BINARY_LIFTING_SIZE> val;
+	int h=0;
 };
 
-vec<Node> getTree(int N, int*briganti, int*A, int*B){
-	vec<Node> nodes(N);
-
-	for(int n=0;n<(N-1);++n){
-		if(A[n]>B[n]) swap(A[n],B[n]);
-		nodes[A[n]].children.push_back(B[n]);
-		nodes[B[n]].parent = A[n];
+void solve(int N, int Q, int* briganti, int* A, int* B, int* start, int* end, int* sol) {
+	vector<vector<int>> adj(N);
+	for(int n=0;n<N-1;++n){
+		adj[A[n]].push_back(B[n]);
+		adj[B[n]].push_back(A[n]);
 	}
 
+	vector<Node> nodes(N);
 	for(int n=0;n<N;++n){
 		nodes[n].brig=briganti[n];
 	}
 
-	nodes[0].parent=0;
-	return nodes;
-}
+	function<void(int, int)> prop = [&](int i, int p) {
+		nodes[i].par[0] = p;
+		nodes[i].val[0] = max(nodes[i].brig, nodes[p].brig);
+		nodes[i].h = nodes[p].h + 1;
 
-void buildTables(vec<Node>& nodes, const si& logN) {
-	for(auto&& node:nodes) {
-		node.stNodes.push_back(node.parent);
-		node.stMax.push_back(node.brig);
-	}
-
-	si pow2=0;
-	while(1){
-		deb("\npow2:",pow2);
-		for(auto&& node:nodes) {
-			deb("b", node.brig, node.stNodes[pow2]);
-			node.stNodes.push_back(nodes[node.stNodes[pow2]].stNodes[pow2]);
-			node.stMax.push_back(max(nodes[node.stNodes[pow2]].stMax[pow2],node.stMax[pow2]));
+		for(auto c:adj[i]){
+			if(nodes[c].chi.empty()) {
+				nodes[i].chi.push_back(c);
+				prop(c, i);
+			}
 		}
-		pow2++;
-		if(pow2>logN)break;
+	};
+	prop(0,0);
+
+	for(int e=1; e<BINARY_LIFTING_SIZE; ++e) {
+		for(int n=0;n<N;++n){
+			nodes[n].par[e] = nodes[nodes[n].par[e-1]].par[e-1];
+			nodes[n].val[e] = max(nodes[n].val[e-1], nodes[nodes[n].par[e-1]].val[e-1]);
+		}
 	}
-}
 
-void buildTimes(vec<Node>& nodes) {
-	si t=0;
-	function<void(si)> dfs = [&dfs, &nodes, &t](si i){
-		nodes[i].tin=t++;
-		for(si child:nodes[i].children)
-			dfs(child);
-		nodes[i].tout=t++;
+	for(int n=0;n<N;++n) deb(n, nodes[n].chi, nodes[n].h, nodes[n].par, nodes[n].val);
+
+
+	auto lift = [&](int i, int h) {
+		for(int e=0; e<BINARY_LIFTING_SIZE; ++e) {
+			if(h & (1LL<<e)) {
+				i = nodes[i].par[e];
+			}
+		}
+		return i;
 	};
-	dfs(0);
-}
 
-void solve(int N, int Q, int *briganti, int *A, int *B, int *start, int *end, int *sol) {
-	si logN = ceil(log2(N));
-	vec<Node> nodes=getTree(N,briganti,A,B);
-
-	buildTables(nodes, logN);
-	buildTimes(nodes);
-
-	auto isAncestor = [&nodes](si u, si v) {
-		// is v an ancestor of u?
-		return nodes[u].tin <= nodes[v].tin && nodes[u].tout >= nodes[v].tout;
+	auto val = [&](int i, int h) {
+		int res=0;
+		for(int e=0; e<BINARY_LIFTING_SIZE; ++e) {
+			if(h & (1LL<<e)) {
+				res = max(res, nodes[i].val[e]);
+				i = nodes[i].par[e];
+			}
+		}
+		return res;
 	};
-	auto lca = [&nodes, &isAncestor, &logN](si u, si v) {
-		if (isAncestor(u, v)) {
+
+	auto lca = [&](int u, int v) {
+		int hu = nodes[u].h, hv = nodes[v].h;
+		if (hu > hv) {
+			u = lift(u, hu-hv);
+		} else if (hv > hu) {
+			v = lift(v, hv-hu);
+		}
+		assert(nodes[u].h == nodes[v].h);
+		if (u == v) {
 			return u;
 		}
-		if (isAncestor(v, u)) {
-			return v;
-		}
 
-		for (int i = logN; i >= 0; --i) {
-			if (!isAncestor(nodes[u].stNodes[i], v)) {
-				u = nodes[u].stNodes[i];
-			}
-		}
-		return nodes[u].stNodes[1];
-	};
-
-	auto maxFrom = [&nodes,&logN,&isAncestor](si u, si a) {
-		si m=nodes[u].brig;
-		
-		deb("maxFrom",u,a);
-		for(int i=logN; i>=0; --i){
-			deb(i, nodes[u].stNodes[i], a);
-			if(isAncestor(a, nodes[u].stNodes[i])) {
-				deb("yes");
-				m = max(m, nodes[u].stMax[i]);
-				u = nodes[u].stNodes[i];
+		for(int e=BINARY_LIFTING_SIZE-1; e>=0; --e) {
+			if (nodes[u].par[e] != nodes[v].par[e]) {
+				u = nodes[u].par[e];
+				v = nodes[v].par[e];
 			}
 		}
 
-		return m;
+		assert(nodes[u].par[0] == nodes[v].par[0]);
+		return nodes[u].par[0];
 	};
 
-#ifdef DEBUG
-	for(auto&& node:nodes){
-		cout<<"parent:"<<node.parent<<" brig:"<<node.brig<<" tin:"<<node.tin<<" tout:"<<node.tout<<"\n";
-		debc(node.stNodes, "stNodes: ");
-		debc(node.stMax, "stMax: ");
-	}
-#endif
 
-	for(int q=0;q<Q;++q){
-		si u = start[q], v = end[q];
-		si anc = lca(u,v);
-		deb("query", u, v, "-> anc", anc);
-		sol[q] = max(maxFrom(u,anc), maxFrom(v,anc));
+	for (int q=0;q<Q;++q){
+		int anc = lca(start[q], end[q]);
+		sol[q] = max(val(start[q], nodes[start[q]].h - nodes[anc].h),
+		             val(end[q],   nodes[end[q]].h   - nodes[anc].h));
 	}
 }
