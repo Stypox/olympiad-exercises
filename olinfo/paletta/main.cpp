@@ -1,3 +1,4 @@
+#pragma GCC optimize("O3")
 #include<bits/stdc++.h>
 using si = int64_t;
 using namespace std;
@@ -44,7 +45,7 @@ si ways(const vector<si>& vec) {
         numeri.update(minimo.second, -1);
         res += numeri.query(minimo.second);
     }
-    
+
     return res;
 }
 
@@ -61,25 +62,3 @@ long long paletta_sort(int N, int V[]) {
     }
     return ways(even)+ways(odd);
 }
-/*
-int main() {
-    int a[] = {2, 0, 4, 3, 1};
-    cout<<paletta_sort(5,a)<<"\n";
-}*/
-/*
-int main() {
-    int a[] = {2,3,0,5,4,1};
-    cout<<paletta_sort(6,a)<<"\n";
-}*/
-/*
-int main() {
-    int N;
-    in>>N;
-
-    vector<int> A(N);
-    for(auto& a:A) {
-        in>>a;
-        //--a;
-    }
-    cout<<paletta_sort(N,A.data())<<"\n";
-}*/
