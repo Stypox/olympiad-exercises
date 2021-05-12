@@ -1,200 +1,31 @@
-#pragma region
-#ifndef DEBUG
 #pragma GCC optimize ("O3")
-#endif
 #include <bits/stdc++.h>
+using namespace std;
 
-#define WORD_SEPARATOR ""
-using i = long long;
-using ui = unsigned long long;
-using f = long double;
-using ch = char;
-using str = std::string;
-template <typename T> using vec = std::vector<T>;
-template <typename T, size_t N> using arr = std::array<T, N>;
+#define int int64_t
+#define float long double
 
-#ifdef __linux__
-#include <sys/stat.h>
-#endif
-#define INLINE inline __attribute__((always_inline))
-
-namespace io {
-	class Input {
-	#ifndef USE_STDIN
-		char* m_data;
-		const char* m_dataBegin;
-	#endif
-	public:
-		INLINE Input();
-		INLINE ~Input();
-		template <typename T> INLINE Input& operator>> (T& data);
-		INLINE Input& operator>> (std::nullptr_t);
-	} in;
-
-	class Output {
-	#ifndef USE_STDOUT
-		std::FILE* m_file;
-	#endif
-	public:
-		INLINE Output();
-		INLINE ~Output();
-		template <typename T> INLINE Output& operator<< (const T& data);
-	} out;
-
-
-	constexpr const char* inputFilename = "input.txt", * outputFilename = "output.txt";
-
-	template<typename T> struct to_format;
-	template<>         struct to_format<signed   char     > { static constexpr const char * format = "%hhd" WORD_SEPARATOR; };
-	template<>         struct to_format<unsigned char     > { static constexpr const char * format = "%hhu" WORD_SEPARATOR; };
-	template<>         struct to_format<signed   short    > { static constexpr const char * format = "%hd"  WORD_SEPARATOR; };
-	template<>         struct to_format<unsigned short    > { static constexpr const char * format = "%hu"  WORD_SEPARATOR; };
-	template<>         struct to_format<signed   int      > { static constexpr const char * format = "%d"   WORD_SEPARATOR; };
-	template<>         struct to_format<unsigned int      > { static constexpr const char * format = "%u"   WORD_SEPARATOR; };
-	template<>         struct to_format<signed   long     > { static constexpr const char * format = "%ld"  WORD_SEPARATOR; };
-	template<>         struct to_format<unsigned long     > { static constexpr const char * format = "%lu"  WORD_SEPARATOR; };
-	template<>         struct to_format<signed   long long> { static constexpr const char * format = "%lld" WORD_SEPARATOR; };
-	template<>         struct to_format<unsigned long long> { static constexpr const char * format = "%llu" WORD_SEPARATOR; };
-	template<>         struct to_format<float             > { static constexpr const char * format = "%f"   WORD_SEPARATOR; };
-	template<>         struct to_format<double            > { static constexpr const char * format = "%f"   WORD_SEPARATOR; };
-	template<>         struct to_format<long double       > { static constexpr const char * format = "%Lf"  WORD_SEPARATOR; };
-	template<>         struct to_format<const char*       > { static constexpr const char * format = "%s"   WORD_SEPARATOR; };
-	template<>         struct to_format<      char*       > { static constexpr const char * format = "%s"   WORD_SEPARATOR; };
-	template<size_t n> struct to_format<      char[n]     > { static constexpr const char * format = "%s"   WORD_SEPARATOR; };
-
-	template<typename T> T read(char*& str);
-	template<> INLINE signed   char      read<signed   char     >(char*& str) { return std::strtol  (str, &str, 0); }
-	template<> INLINE unsigned char      read<unsigned char     >(char*& str) { return std::strtoul (str, &str, 0); }
-	template<> INLINE signed   short     read<signed   short    >(char*& str) { return std::strtol  (str, &str, 0); }
-	template<> INLINE unsigned short     read<unsigned short    >(char*& str) { return std::strtoul (str, &str, 0); }
-	template<> INLINE signed   int       read<signed   int      >(char*& str) { return std::strtol  (str, &str, 0); }
-	template<> INLINE unsigned int       read<unsigned int      >(char*& str) { return std::strtoul (str, &str, 0); }
-	template<> INLINE signed   long      read<signed   long     >(char*& str) { return std::strtol  (str, &str, 0); }
-	template<> INLINE unsigned long      read<unsigned long     >(char*& str) { return std::strtoul (str, &str, 0); }
-	template<> INLINE signed   long long read<signed   long long>(char*& str) { return std::strtoll (str, &str, 0); }
-	template<> INLINE unsigned long long read<unsigned long long>(char*& str) { return std::strtoull(str, &str, 0); }
-	template<> INLINE float              read<float             >(char*& str) { return std::strtof  (str, &str   ); }
-	template<> INLINE double             read<double            >(char*& str) { return std::strtod  (str, &str   ); }
-	template<> INLINE long double        read<long double       >(char*& str) { return std::strtold (str, &str   ); }
-	template<> INLINE std::string        read<std::string       >(char*& str) {
-		while (isspace(*str)) ++str;
-		if (*str == '\0') return "";
-
-		char* begin = str;
-		do { ++str; }
-		while (!isspace(*str) && *str != '\0');
-
-		return std::string{begin, static_cast<unsigned long>(str-begin)};
-	}
-	template<> INLINE void               read<void              >(char*& str) {
-		while (isspace(*str)) ++str;
-		if (*str == '\0') return;
-
-		do { ++str; }
-		while (!isspace(*str) && *str != '\0');
-	}
-
-
-#ifdef USE_STDIN
-	INLINE Input::Input() {
-	#ifndef DEBUG
-		std::cin.sync_with_stdio(false);
-	#endif
-	}
-	INLINE Input::~Input() {}
-	template <typename T> INLINE Input& Input::operator>> (T& data) {
-		std::cin >> data;
-		return *this;
-	}
-	INLINE Input& Input::operator>> (std::nullptr_t) {
-		std::string s;
-		std::cin >> s;
-		return *this;
-	}
+ifstream in{"input.txt"};
+ofstream out{"output.txt"};
+#ifdef DEBUG
+template<class A,class B>ostream&operator<<(ostream&o,const pair<A,B>&p){cout<<"("<<p.first<<", "<<p.second<<")";return o;}
+template<class T,typename=typename enable_if<!is_same<T, string>::value,decltype(*begin(declval<T>()))>::type>ostream&operator<<(ostream&o,const T&v){cout<<"[";for(auto it=v.begin();it!=v.end();++it){if(it!=v.begin()){cout<<", ";}cout<<*it;}cout<<"]";return o;}
+void deb(){cout<<"\n";}template<class T,class...Ts>void deb(const T&t,const Ts&...args){cout<<t;if(sizeof...(args)!=0){cout<<"  ";}deb(args...);}
 #else
-	INLINE Input::Input() {
-		std::FILE* file = fopen(inputFilename, "r");
-	#ifdef DEBUG
-		if (!file) {
-			perror(("Unable to open file " + std::string{inputFilename}).c_str());
-			exit(1);
-		}
-	#endif
-	#ifdef __linux__
-		struct stat info;
-		fstat(fileno(file), &info);
-		size_t size = info.st_size;
-	#else
-		fseek(file, 0, SEEK_END);
-		size_t size = ftell(file);
-		fseek(file, 0, SEEK_SET);
-	#endif
-
-		m_data = new char[size + 1];
-		m_dataBegin = m_data;
-		m_data[size] = '\0';
-
-		fread(m_data, sizeof(char), size, file);
-		fclose(file);
-	}
-	INLINE Input::~Input() {
-	#ifdef DEBUG // leaking memory is not bad, because it reduces time.
-		delete[] m_dataBegin;
-	#endif
-	}
-	template <typename T> INLINE Input& Input::operator>> (T& data) {
-		data = read<T>(m_data);
-		return *this;
-	}
-	INLINE Input& Input::operator>> (std::nullptr_t) {
-		read<void>(m_data);
-		return *this;
-	}
+#define deb(...)
 #endif
-
-#ifdef USE_STDOUT
-	INLINE Output::Output() {}
-	INLINE Output::~Output() {}
-	template <typename T> INLINE Output& Output::operator<< (const T& data) {
-		std::printf(to_format<T>::format, data);
-		return *this;
-	}
-#else
-	INLINE Output::Output() : m_file{fopen(outputFilename, "w")} {
-	#ifdef DEBUG
-		if (!m_file) {
-			perror(("Unable to open file " + std::string{outputFilename}).c_str());
-			exit(1);
-		}
-	#endif
-	}
-	INLINE Output::~Output() {
-		fclose(m_file);
-	}
-	template <typename T> INLINE Output& Output::operator<< (const T& data) {
-		std::fprintf(m_file, to_format<T>::format, data);
-		return *this;
-	}
-#endif
-	template <> INLINE Output& Output::operator<< (const std::string& data) {
-		this->operator<<(data.c_str());
-		return *this;
-	}
-}
-using io::in;
-using io::out;
-#pragma endregion
 
 constexpr int8_t G = 0, S = 1, C = 2, B = 3;
 struct Card {
 	int8_t type, value;
 };
-io::Input& operator>>(io::Input& input, Card& card) {
-	str data;
+istream& operator>>(istream& input, Card& card) {
+	string data;
 	input >> data;
 
 	char typeCh;
-	if (data[1] >= '0' && data[1] <= '9') {
+	if (data[1] == '0') {
+		assert(data[0] == '1');
 		card.value = 10;
 		typeCh = data[2];
 	}
@@ -211,11 +42,13 @@ io::Input& operator>>(io::Input& input, Card& card) {
 		card.type = C;
 	else if (typeCh == 'B')
 		card.type = B;
+	else
+		assert(false);
 
 	return input;
 }
-io::Output& operator<<(io::Output& output, Card& card) {
-	output << card.value;
+ostream& operator<<(ostream& output, Card& card) {
+	output << (int)card.value;
 
 	if (card.type == G)
 		output << "G";
@@ -233,13 +66,13 @@ bool operator==(const Card& a, const Card& b) {
 	return a.type == b.type && a.value == b.value;
 }
 
-int8_t sumAll(const vec<Card>& table) {
+int8_t sumAll(const vector<Card>& table) {
 	int8_t sum = 0;
 	for (auto&& c : table)
 		sum += c.value;
 	return sum;
 }
-bool removeIfEqual(int8_t value, vec<Card>& hand) {
+bool removeIfEqual(int8_t value, vector<Card>& hand) {
 	for(auto it = hand.begin(); it != hand.end(); ++it) {
 		if(it->value == value) {
 			out << *it;
@@ -248,7 +81,7 @@ bool removeIfEqual(int8_t value, vec<Card>& hand) {
 	}
 	return false;
 }
-bool remove4IfSumUpTo(int8_t value, vec<Card>& table) {
+bool remove4IfSumUpTo(int8_t value, vector<Card>& table) {
 	if (sumAll(table) == value) {
 		for(auto&& c : table)
 			out << c;
@@ -256,7 +89,7 @@ bool remove4IfSumUpTo(int8_t value, vec<Card>& table) {
 	}
 	return false;
 }
-bool remove3IfSumUpTo(int8_t value, vec<Card>& table) {
+bool remove3IfSumUpTo(int8_t value, vector<Card>& table) {
 	for(auto it1 = table.begin(); it1 != table.end() - 2; ++it1) {
 		for(auto it2 = it1 + 1; it2 != table.end() - 1; ++it2) {
 			for(auto it3 = it2 + 1; it3 != table.end(); ++it3) {
@@ -269,7 +102,7 @@ bool remove3IfSumUpTo(int8_t value, vec<Card>& table) {
 	}
 	return false;
 }
-bool remove2IfSumUpTo(int8_t value, vec<Card>& table) {
+bool remove2IfSumUpTo(int8_t value, vector<Card>& table) {
 	for(auto it1 = table.begin(); it1 != table.end() - 1; ++it1) {
 		for(auto it2 = it1 + 1; it2 != table.end(); ++it2) {
 			if(it1->value + it2->value == value) {
@@ -280,14 +113,14 @@ bool remove2IfSumUpTo(int8_t value, vec<Card>& table) {
 	}
 	return false;
 }
-bool removeIfSumUpTo(int8_t value, vec<Card>& table) {
+bool removeIfSumUpTo(int8_t value, vector<Card>& table) {
 	return remove4IfSumUpTo(value, table) ||
 		remove3IfSumUpTo(value, table) ||
 		remove2IfSumUpTo(value, table) ||
 		removeIfEqual(value, table);
 }
 
-bool trySetteBelloHand(vec<Card>& hand, vec<Card>& table) {
+bool trySetteBelloHand(vector<Card>& hand, vector<Card>& table) {
 	for(auto it = hand.begin(); it != hand.end(); ++it) {
 		if(*it == Card{G, 7}) {
 			if (removeIfEqual(7, table) || removeIfSumUpTo(7, table)) {
@@ -299,7 +132,7 @@ bool trySetteBelloHand(vec<Card>& hand, vec<Card>& table) {
 	return false;
 }
 
-bool tryScopa(vec<Card>& hand, vec<Card>& table) {
+bool tryScopa(vector<Card>& hand, vector<Card>& table) {
 	bool res = removeIfEqual(sumAll(table), hand);
 	if (res) {
 		for(auto&& c : table)
@@ -308,7 +141,7 @@ bool tryScopa(vec<Card>& hand, vec<Card>& table) {
 	return res;
 }
 
-bool trySetteBelloTable(vec<Card>& hand, vec<Card>& table) {
+bool trySetteBelloTable(vector<Card>& hand, vector<Card>& table) {
 	for(auto it = table.begin(); it != table.end(); ++it) {
 		if(*it == Card{G, 7}) {
 			if (removeIfEqual(7, hand)) {
@@ -320,7 +153,7 @@ bool trySetteBelloTable(vec<Card>& hand, vec<Card>& table) {
 	return false;
 }
 
-bool trySeven(vec<Card>& hand, vec<Card>& table) {
+bool trySeven(vector<Card>& hand, vector<Card>& table) {
 	for(auto it = hand.begin(); it != hand.end(); ++it) {
 		if (it->value == 7 && remove4IfSumUpTo(it->value, table)) {
 			out << *it;
@@ -349,7 +182,7 @@ bool trySeven(vec<Card>& hand, vec<Card>& table) {
 	return false;
 }
 
-bool otherwise(vec<Card>& hand, vec<Card>& table) {
+bool otherwise(vector<Card>& hand, vector<Card>& table) {
 	for(auto it = hand.begin(); it != hand.end(); ++it) {
 		if (remove4IfSumUpTo(it->value, table)) {
 			out << *it;
@@ -377,18 +210,19 @@ bool otherwise(vec<Card>& hand, vec<Card>& table) {
 	return false;
 }
 
-int main() {
-	vec<Card> hand(3), table(4);
+signed main() {
+	vector<Card> hand(3), table(4);
 	for(auto& c : hand)
 		in >> c;
 	for(auto& c : table)
 		in >> c;
 
-	trySetteBelloHand(hand, table) ||
+	assert(trySetteBelloHand(hand, table) ||
 	tryScopa(hand, table) ||
 	trySetteBelloTable(hand, table) ||
 	trySeven(hand, table) ||
-	otherwise(hand, table);
+	otherwise(hand, table));
 
 	return 0;
 }
+
