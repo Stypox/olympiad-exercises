@@ -73,9 +73,8 @@ struct Node {
       }
    }
 
-   void brucia() {
-      if (n == 1)
-      {
+   void erase() {
+      if (n == 1) {
          if (this == par->left) par->left = nullptr;
          else par->right = nullptr;
 
@@ -98,14 +97,35 @@ struct Node {
       }
 
       val = dbc->val;
-      dbc->brucia();
+      dbc->erase();
+   }
+
+   Node* kth(int x) {
+      if (left != nullptr) {
+         if (left->n <= x) {
+            x -= left->n;
+         } else {
+            return left->kth(x);
+         }
+      }
+      
+      if (x == 0) return this;
+      assert(x > 0);
+      assert(right != nullptr);
+      return right->kth(x-1);
+   }
+
+   int countSmaller(int x) {
+      if (val < x)
+         return 1 + (left == nullptr ? 0 : left->n)
+                  + (right == nullptr ? 0 : right->countSmaller(x));
+      return left == nullptr ? 0 : left->countSmaller(x);
    }
 
    void rebalance() {
       vector<int> vals;
 
-      function<void(Node*)> dfs = [&] (Node* e)
-      {
+      function<void(Node*)> dfs = [&] (Node* e) {
          if(e->left!=nullptr) dfs(e->left);
          vals.push_back(e->val);
          if(e->right!=nullptr) dfs(e->right);
@@ -152,6 +172,15 @@ struct ScapegoatTree {
       if (root != nullptr) delete root;
    }
 
+   void print() {
+      if (root == nullptr) {
+         cout<<"( )";
+      } else {
+         root->print();
+      }
+      cout<<"\n";
+   }
+
    void insert(int x) {
       if (root == nullptr) {
          root = new Node(x, nullptr);
@@ -163,39 +192,51 @@ struct ScapegoatTree {
       }
    }
 
-   void brucia(int x) {
-      if (root==nullptr) return;
+   void erase(int x) {
+      if (root == nullptr) return;
 
       Node* found = root->find(x);
       if (found == nullptr) retrun;
 
-      found->brucia();
+      found->erase();
    }
 
-   void print() {
-      if (root == nullptr) {
-         cout<<"( )";
-      } else {
-         root->print();
-      }
-      cout<<"\n";
+   Node* kth(int x) {
+      if (root == nullptr || x >= root->n) return nullptr;
+      return root->kth(x);
+   }
+
+   int countSmaller(int x) {
+      if (root == nullptr) return 0;
+      return root->countSmaller(x);
    }
 };
 
 signed main() {
-   ScapegoatTree t;
-   t.insert(10);
-   t.insert(20);
-   t.insert(15);
-   t.insert(17);
-   t.insert(16);
-   t.insert(0);
-   t.insert(33);
-   t.insert(32);
-   t.insert(30);
-   t.insert(31);
-   t.insert(-10);
-   t.print();
-   t.brucia(32);
-   t.print();
+   ScapegoatTree t;   
+   int N;
+   in>>N;
+   for(int n=0;n<N;++n){
+      in.ignore();
+      char c;
+      int x;
+      in>>c>>x;
+      switch(c){
+      case 'I':
+         t.insert(x);
+         break;
+      case 'D':
+         t.erase(x);
+         break;
+      case 'K': {
+         Node* kth = t.kth(x-1);
+         if (kth == nullptr) out << "invalid\n";
+         else out << kth->val << "\n";
+         break;
+      }
+      case 'C':
+         out << t.countSmaller(x) << "\n";
+         break;
+      }
+   }
 }
