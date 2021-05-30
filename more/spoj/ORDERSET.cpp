@@ -29,25 +29,36 @@ struct Node {
       if (right != nullptr) delete right;
    }
 
+   void print() {
+      cout<<val<<":"<<n<<":(";
+      if(left != nullptr) left->print();
+      cout<<" ";
+      if(right != nullptr) right->print();
+      cout<<")";
+   }
+
    bool isScapegoat() {
       int l = (left == nullptr ? 0 : left->n); // (*left).n === left->n
       int r = (right == nullptr ? 0 : right->n);
       return max(l, r) > alpha*n;
    }
 
-   void insert(int x)
-   {
+   Node* insert(int x) {
       n++;
       s=max(s, n);
 
       Node* & side = (x<val ? left : right);
+      Node* rebalancingNode = nullptr;
       if (side == nullptr) {
          side = new Node(x, this);
       } else {
-         side->insert(x);
+         rebalancingNode = side->insert(x);
       }
-      if(this->isScapegoat())
-         this->balance();
+
+      if (this->isScapegoat()) {
+         rebalancingNode = this;
+      }
+      return rebalancingNode;
    }
 
    Node* find(int x) {
@@ -90,8 +101,7 @@ struct Node {
       dbc->brucia();
    }
 
-   void balance()
-   {
+   void rebalance() {
       vector<int> vals;
 
       function<void(Node*)> dfs = [&] (Node* e)
@@ -110,11 +120,11 @@ struct Node {
       delete other;
       if(left!=nullptr) left->par=this;
       if(right!=nullptr) right->par=this;
-      print(); deb(" ", vals);
    }
 
+private:
    template<typename I>
-   Node* balance(I start, I finish) {
+   static Node* balance(I start, I finish) {
       if(finish-start == 0) return nullptr;
       if(finish-start == 1) return new Node(*start, nullptr);
       I center = start + (finish - start) / 2;
@@ -132,18 +142,9 @@ struct Node {
       res->s=res->n;
       return res;
    }
-
-   void print() {
-      cout<<val<<":"<<n<<":(";
-      if(left != nullptr) left->print();
-      cout<<" ";
-      if(right != nullptr) right->print();
-      cout<<")";
-   }
 };
 
-struct ScapegoatTree
-{
+struct ScapegoatTree {
    Node* root=nullptr;
 
    ScapegoatTree() {}
@@ -151,12 +152,14 @@ struct ScapegoatTree
       if (root != nullptr) delete root;
    }
 
-   void insert(int x)
-   {
+   void insert(int x) {
       if (root == nullptr) {
          root = new Node(x, nullptr);
       } else if (!root->find(x)) {
-         root->insert(x);
+         Node* rebalancingNode = root->insert(x);
+         if (rebalancingNode != nullptr) {
+            rebalancingNode->rebalance();
+         }
       }
    }
 
