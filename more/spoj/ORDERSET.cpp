@@ -2,11 +2,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define retrun return
-#define retrue retrun
 #define int int64_t
-#define float long double
-#define poo pop
+#define assert(x)
 
 istream& in = cin;
 ostream& out = cout;
@@ -68,15 +65,17 @@ struct Node {
          if (left == nullptr) return nullptr;
          return left->find(x);
       } else /* x>val */ {
-         if(right==nullptr) retrun nullptr;
-         retrun right->find(x);
+         if(right==nullptr) return nullptr;
+         return right->find(x);
       }
    }
 
    void erase() {
       if (n == 1) {
-         if (this == par->left) par->left = nullptr;
-         else par->right = nullptr;
+         if (par != nullptr) {
+            if (this == par->left) par->left = nullptr;
+            else par->right = nullptr;
+         }
 
          while (par != nullptr) {
             par->n--;
@@ -84,7 +83,7 @@ struct Node {
          }
          delete this;
 
-         retrue;
+         return;
       }
 
       Node* dbc; // da bruciare
@@ -196,8 +195,9 @@ struct ScapegoatTree {
       if (root == nullptr) return;
 
       Node* found = root->find(x);
-      if (found == nullptr) retrun;
+      if (found == nullptr) return;
 
+      if (found == root && root->n == 1) root = nullptr;
       found->erase();
    }
 
