@@ -16,25 +16,28 @@ void deb(){cout<<"\n";}template<class T,class...Ts>void deb(const T&t,const Ts&.
 #endif
 
 struct SegmentTree {
-   vector<int> datmin, imax;
+   vector<int> datmin, imax, datmax;
    int L;
    SegmentTree(int n) {
-      int L=1;
+      L=1;
       while (L<n) L*=2;
       datmin.resize(L*2, numeric_limits<int>::max());
-      imax.resize(L*2, );
+      imax.resize(L*2, L);
+      datmax.resize(L+1, -1);
    }
 
    void set(int x, int v, int a, int b, int i) {
       if (x >= b || x < a) return;
       if (b-a == 1) {
          datmin[i] = v;
+         datmax[x] = v;
+         imax[i] = x;
          return;
       }
       set(x, v, a, (a+b)/2, i*2);
       set(x, v, (a+b)/2, b, i*2+1);
       datmin[i] = min(datmin[i*2], datmin[i*2+1]);
-      imax[i] = datmin[imax[i*2] + L] > datmin[imax[i*2+1] + L] ? imax[i*2] : imax[i*2+1];
+      imax[i] = datmax[imax[i*2]] > datmax[imax[i*2+1]] ? imax[i*2] : imax[i*2+1];
    }
 
    int queryimax(int x, int y, int a, int b, int i) {
@@ -43,12 +46,12 @@ struct SegmentTree {
 
       int left = queryimax(x, y, a, (a+b)/2, i*2);
       int right = queryimax(x, y, (a+b)/2, b, i*2+1);
-      return datmin[left + L] > datmin[right + L] ? left : right;
+      return left == -1 ? right : (right == -1 || datmax[left] > datmax[right] ? left : right);
    }
 
    int firstSmaller(int x, int y, int v, int a, int b, int i) {
       if (x >= b || y <= a || datmin[i] >= v) return -1;
-      if (b-a == 1) return i-datmin.size()/2;
+      if (b-a == 1) return i - datmin.size()/2;
       int left = firstSmaller(x, y, v, a, (a+b)/2, i*2);
       if (left != -1) return left;
       else return firstSmaller(x, y, v, (a+b)/2, b, i*2+1);
@@ -58,7 +61,7 @@ struct SegmentTree {
 signed main() {
    int N;
    in>>N;
-   
+
    SegmentTree st(N);
    vector<int> S(N);
    for(int n=0;n<N;++n){
@@ -66,13 +69,13 @@ signed main() {
       st.set(n, S[n], 0, st.datmin.size()/2, 1);
    }
 
-   int bestlength=0;
-   for(int n=0;n<N;++n){
+   int bestlength=1;
+   for(int n=0;n<N-bestlength;++n){
       int iFirstSmaller = st.firstSmaller(n, N, S[n], 0, st.L, 1);
       if (iFirstSmaller == -1) iFirstSmaller=N;
       int iMax = st.queryimax(n, iFirstSmaller, 0, st.L, 1);
-      deb(iFirstSmaller, iMax);
-      bestlength = max(bestlength, iMax - n);
+      deb(n, iFirstSmaller, iMax);
+      bestlength = max(bestlength, iMax - n + 1);
    }
 
    out<<bestlength<<"\n";
