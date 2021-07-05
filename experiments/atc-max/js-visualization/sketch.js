@@ -8,6 +8,7 @@ var squareSize = Math.min(canvasWidth, canvasHeight)/N;
 var grid;
 
 function setup() {
+	noSmooth()
 	window.canvas = createCanvas(canvasWidth,canvasHeight)
 	grid = new Grid(N);
 }
