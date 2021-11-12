@@ -1,1 +1,0 @@
-This folder contains files mostly in italian language, that can be used as a trace when teaching. There are no full/lengthy explanations, but rather a few basic words or examples to be accompanied with a spoken explanation.
