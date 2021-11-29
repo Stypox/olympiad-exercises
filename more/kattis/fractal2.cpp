@@ -50,6 +50,9 @@ int main(){
 		for(int d=0;d<D;++d){
 			int i = distance(cumulativeLengths.begin(),
 				upper_bound(cumulativeLengths.begin(), cumulativeLengths.end(), F));
+			if (i>=N){
+				i=N-1;
+			}
 
 			// translation vector for curPoint
 			ld trLen = curLen * hypotl(points[i-1].x-points[0].x, points[i-1].y-points[0].y) / hypotl(points[N-1].x-points[0].x, points[N-1].y-points[0].y);
@@ -58,8 +61,8 @@ int main(){
 					 <<"\n     point: "<<curPoint.x<<" "<<curPoint.y
 				    <<"\n   len&dir: "<<curLen<<" "<<curDir
 					 <<"\n   tr  l&d: "<<trLen<<" "<<trDir<<"\n\n";*/
-			curPoint.x += trLen * cos(trDir);
-			curPoint.y += trLen * sin(trDir);
+			curPoint.x += trLen * cosl(trDir);
+			curPoint.y += trLen * sinl(trDir);
 
 			curLen *= lengths[i];
 			curDir += directions[i];
