@@ -52,6 +52,7 @@ int main(){
 				upper_bound(cumulativeLengths.begin(), cumulativeLengths.end(), F));
 			if (i>=N){
 				i=N-1;
+				F=1.0L;
 			}
 
 			// translation vector for curPoint
