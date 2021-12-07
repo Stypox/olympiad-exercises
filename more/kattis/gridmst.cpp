@@ -3,7 +3,7 @@ using namespace std;
 
 struct Point{
 	int16_t x,y;
-	int par=-1,rank=1;
+	int par=-1;
 };
 
 struct Con{
@@ -77,9 +77,6 @@ int main(){
 			return false;
 		}
 
-		if(points[i].rank<points[j].rank){
-			swap(i,j);
-		}
 		points[j].par=i;
 		return true;
 	};
