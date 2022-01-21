@@ -6,8 +6,8 @@ signed main() {
     cin>>N>>Q;
 
     vector<bitset<20>> nums(N, bitset<20>(0)); // [col][rig]
-    array<array<int, 20>, 20> onesCountXor{array<int, 20>{0}}; // [rigFrom][rigTo]
     array<int, 20> onesCountAnd{0}; // [rig]
+    array<array<int, 20>, 20> onesCountXor{array<int, 20>{0}}; // [rigFrom][rigTo]
 
     auto update = [&](int col, int v) {
         for(int i=0; i<20; ++i){
@@ -29,20 +29,9 @@ signed main() {
         }
     };
 
-    auto printa = [&]() {
-        /*for(int i=0;i<3;++i){
-            cerr<<onesCountAnd[i]<<"  -  ";
-            for(int j=0;j<3;++j){
-                cerr<<onesCountXor[i][j]<<" ";
-            }
-            cerr<<"\n";
-        }*/
-    };
-
     auto solve = [&]() {
         int maxCount = *max_element(onesCountAnd.begin(), onesCountAnd.end());
         if (maxCount % 2 == 1) {
-            printa();
             return maxCount;
         }
 
@@ -66,7 +55,6 @@ signed main() {
             }
         }
 
-        printa();
         return result;
     };
 
