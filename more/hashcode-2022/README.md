@@ -1,3 +1,3 @@
-# Hashcode 2021
+# Hashcode 2022
 
-The files in this folder were created by @AlessioZeni, @TeaPan. It is an incomplete solution for the problem from 2021 we used to train for the 2022 edition.
+The files in this folder were created by @CC576, @AlessioZeni, @TeaPan and @Stypox during Hashcode 2022. Our team, "Motorfish lovers", scored 2891292 points and obtained the 436th position.
