@@ -1,0 +1,6 @@
+*.txt
+*.out
+1
+output
+input/
+.vscode/
