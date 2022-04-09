@@ -1,14 +1,17 @@
-import os, sys, subprocess
-from distutils.dir_util import copy_tree
+import os, sys, subprocess, shutil
 
-def copyTreeCheck(source, destination):
+def checkExistsConfirmOverwrite(destination):
 	if os.path.exists(destination):
-		x = input("The directory of this problem already exists, overwrite it? [y/n] ")
+		x = input("The file/directory of this problem already exists, overwrite it? [y/n] ")
 		if x not in ["y", "Y"]:
 			return False
-
-	copy_tree(source, destination)
 	return True
+
+def copyTreeCheck(source, destination):
+	if checkExistsConfirmOverwrite(destination):
+		shutil.copytree(source, destination, dirs_exist_ok=True)
+		return True
+	return False
 
 def create(source, problem):
 	destinationDir = None
@@ -32,21 +35,26 @@ def create(source, problem):
 			with open(tasks, "r") as f: tasksCont = f.read()
 			tasksCont = tasksCont.replace("$PROBLEM", problem)
 			with open(tasks, "w") as f: f.write(tasksCont)
+	elif source in ["k", "kattis"]:
+		destinationDir = "./kattis/"
+		destinationFile = f"{destinationDir}{problem}.cpp"
+		if checkExistsConfirmOverwrite(destinationFile):
+			shutil.copy2("./src/template-kattis/template.cpp", destinationFile)
 	else:
 		print(f"Invalid source: {source}")
 		return
 
-	programs = ["code", "codium", "vscodium", "atom"]
+	programs = ["codium", "code", "vscodium", "atom"]
 	for program in programs:
 		try:
-			subprocess.check_output(["which", program])
+			subprocess.check_output(["which", program], stderr=subprocess.STDOUT)
 			os.system(f"{program} {destinationDir}")
 			break
 		except: pass
 
 def main(argv):
 	if len(argv) != 3:
-		print("Usage: template.py [o|olinfo|og|olinfo-grader|u|uva] PROBLEM")
+		print("Usage: template.py [o|olinfo|og|olinfo-grader|u|uva|k|kattis] PROBLEM")
 	else:
 		create(argv[1], argv[2])
 
