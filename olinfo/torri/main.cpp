@@ -2,43 +2,78 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define int int64_t
-#define float long double
-
 ifstream in{"input.txt"};
 ofstream out{"output.txt"};
-#ifdef DEBUG
-template<class A,class B>ostream&operator<<(ostream&o,const pair<A,B>&p){cout<<"("<<p.first<<", "<<p.second<<")";return o;}
-template<class T,typename=typename enable_if<!is_same<T, string>::value,decltype(*begin(declval<T>()))>::type>ostream&operator<<(ostream&o,const T&v){cout<<"[";for(auto it=v.begin();it!=v.end();++it){if(it!=v.begin()){cout<<", ";}cout<<*it;}cout<<"]";return o;}
-void deb(){cout<<"\n";}template<class T,class...Ts>void deb(const T&t,const Ts&...args){cout<<t;if(sizeof...(args)!=0){cout<<"  ";}deb(args...);}
-#else
-#define deb(...)
-#endif
+
+struct SegmentTree {
+	static int higherPowerOf2(int x) {
+		int res = 1;
+		while (res < x) res *= 2;
+		return res;
+	}
+
+	vector<int> data;
+	SegmentTree(int n) : data(2 * higherPowerOf2(n), numeric_limits<int>::max()) {}
+
+	int query(int i, int a, int b, int x, int y) {
+		if (b <= x || a >= y) return numeric_limits<int>::max();
+		if (b <= y && a >= x) return data[i];
+
+		return min(query(i*2,   a, (a+b)/2, x, y),
+		           query(i*2+1, (a+b)/2, b, x, y));
+	}
+
+	int update(int i, int a, int b, int x, int v) {
+		if (x < a || x >= b) return data[i];
+		if (a == b-1) {
+			assert(a == x);
+			return data[i] = v;
+		}
+
+		return data[i] = min(update(i*2,   a, (a+b)/2, x, v),
+		                     update(i*2+1, (a+b)/2, b, x, v));
+	}
+
+	int query(int x, int y) {
+		assert(x <= y);
+		return query(1, 0, data.size()/2, x, y);
+	}
+
+	void update(int x, int v) {
+		update(1, 0, data.size()/2, x, v);
+	}
+};
 
 struct Tower {
 	int h,c;
 };
 
 signed main() {
+	constexpr int maxH = 1001;
 	int N;
-	in>>N;
+	in >> N;
 
 	vector<Tower> towers(N);
-	for(int n=0;n<N;++n){
-		in>>towers[n].h>>towers[n].c;
+	int totCost = 0;
+	for(int n=0; n<N; ++n) {
+		in >> towers[n].h >> towers[n].c;
+		totCost += towers[n].c;
 	}
 
-	vector<vector<int>> mem(N, vector<int>(1001, -1));
-	function<int(int,int)> rec = [&](int n, int hPrev) -> int {
-		if (n >= N) return 0;
-		if (mem[n][hPrev] != -1) return mem[n][hPrev];
+	SegmentTree costForHeightSt(maxH);
+	for(int h=0; h<maxH; ++h) {
+		costForHeightSt.update(h, totCost);
+	}
 
-		if (towers[n].h < hPrev) {
-			return mem[n][hPrev] = min(rec(n+1, towers[n].h), rec(n+1, hPrev) + towers[n].c);
-		} else {
-			return mem[n][hPrev] = rec(n+1, hPrev) + towers[n].c;
+	for(int n=0; n<N; ++n) {
+		int minCostOfHigherTower = costForHeightSt.query(towers[n].h+1, maxH);
+		int costIfStoppedHere = minCostOfHigherTower - towers[n].c;
+
+		int currCostForThisHeight = costForHeightSt.query(towers[n].h, towers[n].h+1);
+		if (costIfStoppedHere < currCostForThisHeight) {
+			costForHeightSt.update(towers[n].h, costIfStoppedHere);
 		}
-	};
+	}
 
-	out<<rec(0, 1000)<<"\n";
+	out << costForHeightSt.query(0, maxH) << endl;
 }
