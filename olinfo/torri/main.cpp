@@ -49,17 +49,30 @@ struct Tower {
 };
 
 signed main() {
-	constexpr int maxH = 1001;
 	int N;
 	in >> N;
 
 	vector<Tower> towers(N);
+	set<int> heights;
 	int totCost = 0;
 	for(int n=0; n<N; ++n) {
 		in >> towers[n].h >> towers[n].c;
 		totCost += towers[n].c;
+		heights.insert(towers[n].h);
 	}
 
+	// remap heights to be surely in range [0, N)
+	map<int,int> mapHToOrd;
+	int i=0;
+	for (int e:heights) {
+		mapHToOrd[e] = i;
+		i++;
+	}
+	for (auto& tower : towers) {
+		tower.h = mapHToOrd[tower.h];
+	}
+
+	int maxH = i+1; // size of the segment tree + one always unchanged place
 	SegmentTree costForHeightSt(maxH);
 	for(int h=0; h<maxH; ++h) {
 		costForHeightSt.update(h, totCost);
