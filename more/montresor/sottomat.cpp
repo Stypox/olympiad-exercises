@@ -19,13 +19,12 @@ signed main() {
 	int R,C;
 	in>>R>>C;
 
-	vector<int> v(10, 7);
-
-	vector<vector<int>> M(R, vector<int>(C)), cumsum(R+1, vector<int>(C+1, 0));
+	vector<vector<int>> cumsum(R+1, vector<int>(C+1, 0));
 	for(int r=0;r<R;++r){
 		for(int c=0;c<C;++c){
-			in>>M[r][c];
-			cumsum[r+1][c+1] = cumsum[r+1][c] + cumsum[r][c+1] - cumsum[r][c] + M[r][c];
+			int v;
+			in>>v;
+			cumsum[r+1][c+1] = cumsum[r+1][c] + cumsum[r][c+1] - cumsum[r][c] + v;
 		}
 	}
 
