@@ -5,5 +5,5 @@ fn main() {
 	io::stdin().read_line(&mut input).unwrap();
 	let n: i64 = input.trim().parse().unwrap();
 
-	print!("{}\n", n);
+	println!("{}", n);
 }
