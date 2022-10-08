@@ -1,20 +1,9 @@
 use std::{io, collections::BinaryHeap, cmp::Reverse};
 
+#[derive(Clone)]
 struct Node {
 	pub min_so_far: i64,
 	pub to: Vec<(usize, i64)>
-}
-
-impl Clone for Node {
-	fn clone(&self) -> Self {
-		return Node { min_so_far: self.min_so_far, to: self.to.clone() };
-	}
-}
-
-impl Default for Node {
-	fn default() -> Self {
-		return Node { min_so_far: i64::MAX, to: vec![] };
-	}
 }
 
 fn main() {
@@ -24,7 +13,7 @@ fn main() {
 	let n = input.next().unwrap();
 	let m = input.next().unwrap();
 
-	let mut nodes = vec![Node::default(); n];
+	let mut nodes = vec![Node { min_so_far: i64::MAX, to: vec![] }; n];
 	for _ in 0..m {
 		let mut input = String::new();
 		io::stdin().read_line(&mut input).unwrap();
