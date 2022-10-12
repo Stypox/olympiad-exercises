@@ -20,11 +20,35 @@ void deb(){cout<<"\n";}template<class T,class...Ts>void deb(const T&t,const Ts&.
 // ds = 0
 // dd = 0
 // sd ss = 0
+// sd ds = 0
 // ds sd = 0
 // dd sd = 0
 // sd sd = sd
 
-// ss dd sd dd sd sd ss ds ds ds ds ds dd ds ds ds ds sd
+template<typename Iter>
+void isLeftRemovable(int N, string& S, Iter v) {
+	bool dd_or_ds = false;
+	bool doable = true;
+	for(int n = 0; n < N-1; n += 2) {
+		string piece = S.substr(n,2);
+		if (piece == "ss") {
+			// everything on the left is surely removable
+			doable = true;
+		} else if (piece == "sd") {
+			// multiple of these simplify to one, need to be removed either from left or right
+			doable = dd_or_ds;
+		} else if (piece == "ds") {
+			// can remove everything on left or on right, but not at the same time
+			dd_or_ds = doable;
+			doable = true;
+		} else if (piece == "dd") {
+			// everything on the right is surely removable, but keep state on left
+			dd_or_ds = doable;
+		}
+		// the first item's left is always removable (there is nothing on the left!)
+		v[n/2 + 1] = v[n/2 + 1] && doable;
+	}
+}
 
 signed main() {
 	int N;
@@ -32,18 +56,36 @@ signed main() {
 	in>>N>>S;
 
 	assert(N%2 == 1);
+	if (N != 1) {
+		// the first and the last piece should never be taken
+		S[0] = 's';
+		S.end()[-1] = 'd';
+	}
+
+	// will be true only at indices n such that n*2 can remain alone
 	vector<bool> v(N/2 + 1, true);
+	isLeftRemovable(N, S, v.begin());
 
-	for(int n = 0; n != N; n += 2) {
-		string piece = S.substr(n,2);
-		if (piece == "SS") {
+	// invert the string in order to reuse same function
+	reverse(S.begin(), S.end());
+	for (char& s : S) s = (s == 's' ? 'd' : 's');
+	isLeftRemovable(N, S, v.rbegin());
 
-		} else if (piece == "SD") {
-
-		} else if (piece == "DS") {
-
-		} else if (piece == "DD") {
-
+	// find solution
+	vector<int> res;
+	for(int n = 0; n < N/2+1; ++n) {
+		if (v[n]) {
+			res.push_back(n*2);
 		}
 	}
+
+	// print solution
+	out<<res.size()<<"\n";
+	for(size_t i=0;i<res.size();++i){
+		if(i!=0){
+			out<<" ";
+		}
+		out<<res[i];
+	}
+	out<<"\n";
 }
