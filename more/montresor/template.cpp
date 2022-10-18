@@ -14,6 +14,8 @@ void deb(){cout<<"\n";}template<class T,class...Ts>void deb(const T&t,const Ts&.
 #else
 #define deb(...)
 #endif
+#define cout Do not use cout!!!
+#define cin Do not use cin!!!
 
 signed main() {
 
