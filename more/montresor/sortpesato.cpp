@@ -21,25 +21,41 @@ signed main() {
 	int N;
 	in>>N;
 
-	vector<int> V(N);
-	for(int n=0;n<N;++n){
+	vector<int> V(N+1);
+	int P = 0;
+	for(int n=1;n<=N;++n){
 		in>>V[n];
-		V[n]--;
+		P += V[n];
 	}
 
-	int S=0;
-	vector<bool> seen(N, false);
-	for(int n=0;n<N;++n){
+	int S = 0;
+	vector<bool> seen(N+1, false);
+	for(int n=1;n<=N;++n){
 		if(!seen[n]) {
 			seen[n] = true;
-			int cur=V[n];
+			int cur = V[n];
+			int mincycle = n;
+			int lencycle = 1;
+
 			while (cur != n) {
+				if (cur < mincycle) {
+					mincycle = cur;
+				}
+				++lencycle;
+
 				seen[cur] = true;
-				++S;
 				cur=V[cur];
 			}
+
+			S += lencycle - 1;
+			P += min(
+				// drag the smallest item along the cycle
+				mincycle * (lencycle - 2),
+				// or import the 1 into the cycle and drag 1 along the cycle
+				mincycle + lencycle + 1
+			);
 		}
 	}
 
-	out<<S<<" "<<0<<"\n";
+	out<<S<<" "<<P<<"\n";
 }
