@@ -29,25 +29,45 @@ signed main() {
 		}
 	}
 
-	bool seen;
-	int wantedCnt;
-	vector<vector<int>> mem;
+	auto countBits = [&](uint16_t used) {
+		int cnt=0;
+		for(int n=0;n<N;++n){
+			cnt += ((used & (1<<n)) != 0);
+		}
+		return cnt;
+	};
+
+	auto canChoosePerson = [&](int n, int m, uint16_t used) {
+		return (used & (1<<n)) == 0 && (L[m] & (1<<n)) != 0;
+	};
+
+	int maxCnt=0;
+	vector<vector<bool>> seen(M, vector<bool>(1<<N, false));
+	function<void(int, uint16_t)> recCnt = [&](int m, uint16_t used) -> void {
+		if (m >= M) {
+			maxCnt=max(countBits(used),maxCnt);
+
+		} else if (!seen[m][used]) {
+			seen[m][used]=true;
+			recCnt(m+1, used);
+			for(int n=0;n<N;++n){
+				if (canChoosePerson(n, m, used)) {
+					recCnt(m+1, used | (1<<n));
+				}
+			}
+		}
+	};
+
+	vector<vector<int>> mem(M, vector<int>(1<<N, -1));
 	function<int(int, uint16_t)> rec = [&](int m, uint16_t used) -> int {
 		if (m >= M) {
-			int cnt=0;
-			for(int n=0;n<N;++n){
-				cnt += ((used & (1<<n)) != 0);
-			}
-			if (cnt == wantedCnt) {
-				seen = true;
-			}
-			return cnt == wantedCnt;
+			return countBits(used) == maxCnt;
 		}
 
 		if (mem[m][used] == -1) {
 			int ways = rec(m+1, used);
 			for(int n=0;n<N;++n){
-				if ((used & (1<<n)) == 0 && (L[m] & (1<<n)) != 0) {
+				if (canChoosePerson(n, m, used)) {
 					ways += rec(m+1, used | (1<<n));
 					ways %= MOD;
 				}
@@ -58,14 +78,8 @@ signed main() {
 		return mem[m][used];
 	};
 
-	for(wantedCnt=N; wantedCnt>=0; --wantedCnt) {
-		seen=false;
-		mem.clear();
-		mem.resize(M, vector<int>(1<<N, -1));
-		int r=rec(0, 0);
-		if (seen) {
-			out << r << "\n";
-			break;
-		}
-	}
+	// first just count the maximum number of fillable places
+	recCnt(0, 0);
+	// then actually find the number of ways to reach the maximum
+	out << rec(0, 0) << "\n";
 }
