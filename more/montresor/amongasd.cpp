@@ -51,19 +51,11 @@ struct Edge {
 
 struct Node {
     vector<Edge> adjList;
-    Node *parent_I = nullptr, *parent_S = nullptr;
-    int hops = 0, distance = 0;
+    int distance = 0;
     Visitor visitedBy = Visitor::none;
+    int parent;
 
     Node() {}
-    void setParentIfNull(Node& parent) { // FIXME: si rischia di assegnare un parent a I e S... è un problema?
-        if ((parent.visitedBy == Visitor::student || parent.visitedBy == Visitor::both) && parent_I == nullptr) parent_I = &parent;
-        if ((parent.visitedBy == Visitor::imposter || parent.visitedBy == Visitor::both) && parent_S == nullptr) parent_S = &parent;
-    }
-    void setParent(Node& parent) { // FIXME: si rischia di assegnare un parent a I e S... è un problema?
-        if (parent.visitedBy == Visitor::student || parent.visitedBy == Visitor::both) parent_I = &parent;
-        if (parent.visitedBy == Visitor::imposter || parent.visitedBy == Visitor::both) parent_S = &parent;
-    }
     void mergeVisitors(Visitor visitor) {
         if (visitor == visitedBy) return;
         visitedBy = Visitor::both; // check della correttezza
@@ -74,8 +66,88 @@ ostream& operator<< (ostream& out, const Node& node) {
     return out << node.distance << ' ' << (int) node.visitedBy;
 }
 
+void resetDistance(vector<Node>& nodes, int I, int S) {
+    for (auto&& node : nodes) {
+        node.distance = numeric_limits<int>::max();
+    }
+    nodes[I].distance = 0;
+    nodes[S].distance = 0;
+}
 
-void ventilate (vector<Node>& nodes, int I, int S, int F);
+
+struct QueueEntity {
+    int distance, node;
+    QueueEntity(int distance, int node) : distance(distance), node(node) {}
+    QueueEntity() : QueueEntity(0, 0) {}
+
+    bool operator< (const QueueEntity& other) const {
+        // le priority queue vanno al contrario, quindi > invece che < per ordinare al minimo
+        return distance > other.distance;
+    }
+};
+
+void ventilate(vector<Node>& nodes, int I, int S, int F) {
+    resetDistance(nodes, I, S);
+
+    priority_queue<QueueEntity> queue;
+    queue.push(QueueEntity(0, I));
+    queue.push(QueueEntity(0, S));
+    nodes[I].visitedBy = Visitor::imposter;
+    nodes[S].visitedBy = Visitor::student;
+
+    while (!queue.empty()) {
+        int nodeIndex = queue.top().node;
+        int visitDistance = queue.top().distance;
+        queue.pop();
+        if (nodeIndex == F) break;
+
+        Node& node = nodes[nodeIndex];
+        if (visitDistance > node.distance) continue;
+
+        for (Edge& edge : node.adjList) {
+            Node& target = nodes[edge.to];
+            int newDistance = node.distance + edge.getSetAppropiateTime(node.visitedBy);
+            if (newDistance < target.distance) {
+                // this branch is taken also when target.visitedBy==none,
+                // since target.distance would be infinite
+                target.visitedBy = node.visitedBy;
+                target.distance = newDistance;
+                queue.push(QueueEntity(newDistance, edge.to));
+            } else if (target.distance == newDistance) {
+                // will be visited later, so need to merge visitors
+                target.mergeVisitors(node.visitedBy);
+            }
+        }
+    }
+}
+
+void dijkstraOnChosenEdges(vector<Node>& nodes, int A, int B) {
+    resetDistance(nodes, A, A);
+
+    priority_queue<QueueEntity> queue;
+    queue.push(QueueEntity(0, A));
+
+    while (!queue.empty()) {
+        int nodeIndex = queue.top().node;
+        int visitDistance = queue.top().distance;
+        queue.pop();
+        if (nodeIndex == B) break;
+
+        Node& node = nodes[nodeIndex];
+        if (visitDistance > node.distance) continue;
+
+        for (Edge& edge : node.adjList) {
+            Node& target = nodes[edge.to];
+            int newDistance = node.distance + edge.chosen;
+            if (newDistance < target.distance) {
+                target.parent = nodeIndex;
+                target.distance = newDistance;
+                queue.push(QueueEntity(newDistance, edge.to));
+            }
+        }
+    }
+}
+
 
 int main () {
     int N, M, K, I, S, F;
@@ -94,13 +166,17 @@ int main () {
     }
 
     ventilate(nodes, I, S, F);
-    nodes[I].parent_I = nodes[I].parent_S = nodes[S].parent_I = nodes[S].parent_S = nullptr;
 
-    deb(nodes);
+    // --- print whether the F node is first reached by imposter or students
     out << (int) nodes[F].visitedBy << endl;
 
-    out << 378426374 << endl;
+    // --- print the lengths of the paths for imposter and students
+    dijkstraOnChosenEdges(nodes, S, F);
+    int studentsPathLength = nodes[F].distance;
+    dijkstraOnChosenEdges(nodes, I, F);
+    out << nodes[F].distance << " " << studentsPathLength << endl;
 
+    // --- print the values chosen for the K edges
     vector<int> chosenEdgeValues(K);
     for (auto&& node : nodes) {
         for (auto&& edge : node.adjList) {
@@ -117,57 +193,17 @@ int main () {
     }
     out << endl;
 
-    return 0;
-}
-
-
-struct QueueEntity {
-    int distance, node;
-    QueueEntity(int distance, int node) : distance(distance), node(node) {}
-    QueueEntity() : QueueEntity(0, 0) {}
-
-    bool operator< (const QueueEntity& other) const {
-        // le priority queue vanno al contrario, quindi > invece che < per ordinare al minimo
-        return distance > other.distance;
+    // --- print the rooms visited by the imposter
+    vector<int> imposterRooms{F};
+    while (imposterRooms.back() != I) {
+        imposterRooms.push_back(nodes[imposterRooms.back()].parent);
     }
-};
-
-void ventilate(vector<Node>& nodes, int I, int S, int F) {
-    vector<bool> elaborated(nodes.size(), false);
-
-    priority_queue<QueueEntity> queue;
-    queue.push(QueueEntity(0, I));
-    queue.push(QueueEntity(0, S));
-    nodes[I].visitedBy = Visitor::imposter;
-    nodes[S].visitedBy = Visitor::student;
-
-    while (!queue.empty()) {
-        int node = queue.top().node;
-        queue.pop();
-        if (elaborated[node]) continue;
-        if (node == F) break;
-        elaborated[node] = true;
-
-        for (Edge& edge : nodes[node].adjList) {
-            Node& target = nodes[edge.to];
-            if (target.visitedBy == Visitor::none) {
-                target.visitedBy = nodes[node].visitedBy;
-                target.distance = nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy);
-                target.hops = nodes[node].hops + 1; // TODO: solo se imposter
-                target.setParent(nodes[node]);
-                queue.push(QueueEntity(target.distance, edge.to));
-            } else if (target.distance < nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy)) {
-                target.setParentIfNull(nodes[node]);
-            } else if (target.distance == nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy)) {
-                target.setParentIfNull(nodes[node]); // TODO: update hops se necessario
-                target.mergeVisitors(nodes[node].visitedBy);
-            } else if (target.distance > nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy)) {
-                target.visitedBy = nodes[node].visitedBy;
-                target.distance = nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy);
-                target.hops = nodes[node].hops + 1; // TODO: solo se imposter
-                target.setParent(nodes[node]);
-                queue.push(QueueEntity(target.distance, edge.to));
-            }
+    int R = imposterRooms.size();
+    out << R << endl;
+    for (int i = 0; i < R; ++i) {
+        if (i != 0) {
+            out << " ";
         }
+        out << imposterRooms[R-i-1];
     }
 }
