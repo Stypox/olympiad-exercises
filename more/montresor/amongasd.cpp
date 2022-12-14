@@ -20,17 +20,31 @@ enum class Visitor { both, imposter, student, none };
 struct Edge {
     int to;
     int min, max;
+    int chosen;
+    int index;
 
-    Edge(int to, int min, int max) : to(to), min(min), max(max) {}
-    Edge(int to, int time) : Edge(to, time, time) {}
-    Edge() : Edge(0, 0, 0) {}
+    Edge(int to, int min, int max, int index) : to(to), min(min), max(max), chosen(min), index(index) {}
+    Edge(int to, int time) : Edge(to, time, time, -1) {}
+    Edge() : Edge(0, 0, 0, -1) {}
 
-    int getAppropiateTime(Visitor visitor) {
+    int getSetAppropiateTime(Visitor visitor) {
         switch (visitor) {
-            case Visitor::imposter: return min;
-            case Visitor::student: case Visitor::both: return max;
-            case Visitor::none: default: throw "error";
+            case Visitor::imposter: {
+                chosen = min;
+                break;
+            }
+            case Visitor::student:
+            case Visitor::both: {
+                chosen = max;
+                break;
+            }
+            case Visitor::none:
+            default: {
+                throw "Unreachable";
+            }
         }
+
+        return chosen;
     }
 };
 
@@ -76,7 +90,7 @@ int main () {
     for (int i = 0; i < K; ++i) {
         int u, v, min, max;
         in >> u >> v >> min >> max;
-        nodes[u].adjList.push_back(Edge(v, min, max));
+        nodes[u].adjList.push_back(Edge(v, min, max, i));
     }
 
     ventilate(nodes, I, S, F);
@@ -84,6 +98,24 @@ int main () {
 
     deb(nodes);
     out << (int) nodes[F].visitedBy << endl;
+
+    out << 378426374 << endl;
+
+    vector<int> chosenEdgeValues(K);
+    for (auto&& node : nodes) {
+        for (auto&& edge : node.adjList) {
+            if (edge.index != -1) {
+                chosenEdgeValues[edge.index] = edge.chosen;
+            }
+        }
+    }
+    for (int i = 0; i < K; ++i) {
+        if (i != 0) {
+            out << " ";
+        }
+        out << chosenEdgeValues[i];
+    }
+    out << endl;
 
     return 0;
 }
@@ -120,18 +152,18 @@ void ventilate(vector<Node>& nodes, int I, int S, int F) {
             Node& target = nodes[edge.to];
             if (target.visitedBy == Visitor::none) {
                 target.visitedBy = nodes[node].visitedBy;
-                target.distance = nodes[node].distance + edge.getAppropiateTime(nodes[node].visitedBy);
+                target.distance = nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy);
                 target.hops = nodes[node].hops + 1; // TODO: solo se imposter
                 target.setParent(nodes[node]);
                 queue.push(QueueEntity(target.distance, edge.to));
-            } else if (target.distance < nodes[node].distance + edge.getAppropiateTime(nodes[node].visitedBy)) {
+            } else if (target.distance < nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy)) {
                 target.setParentIfNull(nodes[node]);
-            } else if (target.distance == nodes[node].distance + edge.getAppropiateTime(nodes[node].visitedBy)) {
+            } else if (target.distance == nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy)) {
                 target.setParentIfNull(nodes[node]); // TODO: update hops se necessario
                 target.mergeVisitors(nodes[node].visitedBy);
-            } else if (target.distance > nodes[node].distance + edge.getAppropiateTime(nodes[node].visitedBy)) {
+            } else if (target.distance > nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy)) {
                 target.visitedBy = nodes[node].visitedBy;
-                target.distance = nodes[node].distance + edge.getAppropiateTime(nodes[node].visitedBy);
+                target.distance = nodes[node].distance + edge.getSetAppropiateTime(nodes[node].visitedBy);
                 target.hops = nodes[node].hops + 1; // TODO: solo se imposter
                 target.setParent(nodes[node]);
                 queue.push(QueueEntity(target.distance, edge.to));
