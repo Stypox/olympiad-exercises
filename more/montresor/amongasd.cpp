@@ -15,15 +15,18 @@ struct Edge {
     Edge(int to, int time) : Edge(to, time, time, -1) {}
     Edge() : Edge(0, 0, 0, -1) {}
 
-    int getSetAppropiateTime(Visitor visitor) {
+    int getSetAppropiateTime(Visitor visitor, bool useMinForVisitorBoth) {
         switch (visitor) {
             case Visitor::imposter: {
                 chosen = min;
                 break;
             }
-            case Visitor::student:
-            case Visitor::both: {
+            case Visitor::student: {
                 chosen = max;
+                break;
+            }
+            case Visitor::both: {
+                chosen = useMinForVisitorBoth ? min : max;
                 break;
             }
             case Visitor::none:
@@ -74,7 +77,7 @@ struct QueueEntity {
     }
 };
 
-void ventilate(vector<Node>& nodes, int I, int S, int F) {
+void ventilate(vector<Node>& nodes, int I, int S, int F, bool useMinForVisitorBoth) {
     resetDistance(nodes, I, S);
 
     priority_queue<QueueEntity> queue;
@@ -94,7 +97,7 @@ void ventilate(vector<Node>& nodes, int I, int S, int F) {
 
         for (Edge& edge : node.adjList) {
             Node& target = nodes[edge.to];
-            int newDistance = node.distance + edge.getSetAppropiateTime(node.visitedBy);
+            int newDistance = node.distance + edge.getSetAppropiateTime(node.visitedBy, useMinForVisitorBoth);
             if (newDistance < target.distance) {
                 // this branch is taken also when target.visitedBy==none,
                 // since target.distance would be infinite
@@ -156,7 +159,10 @@ int main () {
         nodes[u].adjList.push_back(Edge(v, min, max, i));
     }
 
-    ventilate(nodes, I, S, F);
+    ventilate(nodes, I, S, F, false);
+    if (nodes[F].visitedBy == Visitor::student) {
+        ventilate(nodes, I, S, F, true);
+    }
 
     // --- print whether the F node is first reached by imposter or students
     out << (int) nodes[F].visitedBy << endl;
@@ -197,4 +203,5 @@ int main () {
         }
         out << imposterRooms[R-i-1];
     }
+    out << endl;
 }
