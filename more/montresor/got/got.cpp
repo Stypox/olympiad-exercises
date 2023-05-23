@@ -20,7 +20,7 @@ using sint = uint16_t; // small int
 using fint = uint_fast16_t; // fast int
 using fbint = uint_fast32_t; // fast big int
 
-fint R,C;
+fint R,C,J;
 vector<sint> grid;
 
 #define for_neighbors(i, var_name, code) \
@@ -42,31 +42,179 @@ struct Castle {
 };
 vector<Castle> castles;
 
+struct Pole {
+    sint missing;
+};
+
+constexpr sint NONE = numeric_limits<sint>::max();
 struct Sol {
+    vector<Pole> poles;
     vector<sint> mem;
-    set<sint> usableCastles;
-    sint taken=0;
+    sint completed=0;
 
-    Sol() : mem(R*C,0) {
-        // initializes a solution that just takes all 1s available
-        for(fint i=0;i<R*C;++i){
-            if(grid[i]==1){
-                for_neighbors(i, neigh, if(mem[neigh]!=0) break;)
-                mem[i]=1;
-                taken+=1;
+    void populate() {
+        poles.resize(J);
+        mem.resize(R*C,NONE);
+        completed = 0;
+
+        queue<pair<sint,sint>> q;
+        for(sint j=0;j<J;++j){
+            q.push(pair<sint,sint>(castles[j].i, j));
+            poles[j].missing = castles[j].size;
+        }
+
+        while(!q.empty()){
+            sint i,j;
+            tie(i,j)=q.front();
+            q.pop();
+
+            if (mem[i] != NONE) continue;
+            const Castle& castle = castles[j];
+            if (grid[i] != 0 && grid[i] != castle.size) continue;
+            Pole& pole = poles[j];
+            if (pole.missing == 0) continue;
+            for_neighbors(i, neigh, if (mem[neigh] != NONE && mem[neigh] != j && castles[mem[neigh]].size == castle.size) continue;)
+
+            pole.missing -= 1;
+            if (pole.missing == 0) {
+                completed += castle.size;
+            }
+            mem[i] = j;
+
+            for_neighbors(i, neigh, {
+                if (mem[neigh] == NONE && pole.missing != 0) {
+                    q.push(pair<sint,sint>(neigh, j));
+                }
+            })
+        }
+
+        // deb("INITIAL!!");
+        // for(auto pole:poles)deb(pole.missing);
+        // debprint();
+    }
+
+    void deletePole() {
+        int j=rand()%J;
+        const Castle& castle = castles[j];
+        Pole& pole = poles[j];
+        if(pole.missing == NONE) return;
+
+        // deb("Deleting", j);
+        // debprint();
+
+        queue<sint> q;
+        map<sint,sint> conn;
+        q.push(castles[j].i);
+        while(!q.empty()){
+            int i=q.front();
+            q.pop();
+            if (mem[i]!=j) {
+                if (grid[i]==0 && mem[i]!=NONE) {
+                    for_neighbors(i, neigh, {
+                        if(mem[neigh]==NONE){
+                            conn[mem[i]]=neigh;
+                        }
+                    })
+                }
+                continue;
+            }
+            mem[i]=NONE;
+            for_neighbors(i, neigh, q.push(neigh);)
+        }
+
+        /*vector<pair<sint,sint>> conn2;
+        conn2.insert(conn2.begin(), conn.begin(), conn.end());
+        random_shuffle(conn2.begin(), conn2.end()/*, [&](const pair<sint,sint>& a, const pair<sint,sint>& b) {
+            return poles[a.first].missing > poles[b.first].missing;
+        );*/
+
+        for(pair<sint,sint> con : conn){
+            int jj,ii;
+            tie(jj,ii)=con;
+            const Castle& castle2 = castles[jj];
+            Pole& pole2 = poles[jj];
+            // deb("Expanding", jj, ii, pole2.missing);
+
+            q.push(ii);
+            while(!q.empty()) {
+                int i=q.front();
+                q.pop();
+                if (mem[i] != NONE) continue;
+                if (grid[i] != 0 && grid[i] != castle2.size) continue;
+                if (pole2.missing == 0) continue;
+                for_neighbors(i, neigh, if (mem[neigh] != NONE && mem[neigh] != jj && castles[mem[neigh]].size == castle2.size) continue;)
+
+                pole2.missing -= 1;
+                if (pole2.missing == 0) {
+                    completed += castle2.size;
+                }
+                mem[i] = jj;
+
+                for_neighbors(i, neigh, {
+                    if (mem[neigh] == NONE && pole2.missing != 0) {
+                        q.push(neigh);
+                    }
+                })
             }
         }
 
-        for(fint j=0;j<castles.size();++j){
-            if(castles[j].size!=1){
-                usableCastles.insert(j);
+        if (pole.missing == 0) completed -= castle.size;
+        pole.missing = NONE;
+        // debprint();
+        // deb("Deleted", j, "\n");
+    }
+
+    void readdPole() {
+        int j=rand()%J;
+        for(int jj=j;jj!=j+J;++jj){
+            if(poles[jj%J].missing == NONE) {
+                j=jj%J;
+                break;
             }
         }
+        if(poles[j].missing != NONE) return;
+
+        // deb("Readding", j);
+        // debprint();
+
+        queue<sint> q;
+        q.push(castles[j].i);
+        poles[j].missing = castles[j].size;
+        while(!q.empty()){
+            sint i=q.front();
+            q.pop();
+
+            if (mem[i] != NONE) continue;
+            const Castle& castle = castles[j];
+            if (grid[i] != 0 && grid[i] != castle.size) continue;
+            Pole& pole = poles[j];
+            if (pole.missing == 0) continue;
+            for_neighbors(i, neigh, if (mem[neigh] != NONE && mem[neigh] != j && castles[mem[neigh]].size == castle.size) continue;)
+
+            pole.missing -= 1;
+            if (pole.missing == 0) {
+                completed += castle.size;
+            }
+            mem[i] = j;
+
+            for_neighbors(i, neigh, {
+                if (mem[neigh] == NONE && pole.missing != 0) {
+                    q.push(neigh);
+                }
+            })
+        }
+
+        // debprint();
+        // deb("Readded", j, "\n");
     }
 
     void print() const {
         for(fint i=0;i<R*C;++i){
-            out<<mem[i];
+            if (mem[i] != NONE && poles[mem[i]].missing == 0) {
+                out<<castles[mem[i]].size;
+            } else {
+                out<<'0';
+            }
             if(i%C==C-1){
                 out<<"\n";
             } else {
@@ -77,29 +225,38 @@ struct Sol {
     }
 
     void debprint() const {
+    #ifdef DEBUG
         for(fint i=0;i<R*C;++i){
-            cerr<<mem[i];
+            cerr<<setw(2);
+            if (mem[i]==NONE){
+                cerr<<-1;
+            } else {
+                cerr<<mem[i];
+            }
             if(i%C==C-1){
                 cerr<<"\n";
             } else {
                 cerr<<" ";
             }
         }
-        cerr<<"*** (" << taken << " taken)"<<endl;
+        cerr<<"*** ("<<completed<<")"<<endl;
+    #endif
     }
 };
 
 vector<Sol> sols;
 void setupTimeLimit(){
     struct sigaction new_action;
-    new_action.sa_handler = [](int signum) {
-        int besti, bestt=0;
-        for(int i=0;i<sols.size();++i){
-            if(sols[i].taken>bestt){
-                bestt=sols[i].taken;
+    new_action.sa_handler = [](int) {
+        int besti=0, bestt=0;
+        for(size_t i=0;i<sols.size();++i){
+            sols[i].readdPole();
+            if(sols[i].completed>bestt){
+                bestt=sols[i].completed;
                 besti=i;
             }
         }
+        deb(bestt);
         sols[besti].print();
         quick_exit(0);
     };
@@ -110,7 +267,7 @@ void setupTimeLimit(){
 
     struct rlimit limit;
     getrlimit(RLIMIT_CPU, &limit);
-    limit.rlim_cur = 2;
+    limit.rlim_cur = 1;
     setrlimit(RLIMIT_CPU, &limit);
 }
 
@@ -126,106 +283,31 @@ signed main() {
         }
     }
     sort(castles.begin(), castles.end());
-    deb("Castles:",castles.size());
+    J = castles.size();
+    deb("Castles:", J);
 
-    /*for(fint i=0;i<R*C;++i){
-        for(fint j=0;j<R*C;++j){
-            if(manh_dist(i,j) != manh_dist(j,i)){
-                deb("Different", i, j, manh_dist(i,j), manh_dist(j,i));
-                assert(false);
-            }
-            int d = manh_dist(i,j);
-            int ri=i/C;
-            int rj=j/C;
-            int ci=i%C;
-            int cj=j%C;
-            if (abs(ri-rj)+abs(ci-cj)!=d) {
-                deb("Error", i, j, d, ri, rj, ci, cj, abs(ri-rj)+abs(ci-cj));
-                assert(false);
-            }
-        }
-    }*/
+    Sol baseline;
+    baseline.populate();
+    sols.resize(max((size_t)2, (size_t)20000/R/C),baseline);
+    deb("Done populating");
 
-    sols.resize(2);
-    vector<sint> used(R*C,0);
-    vector<sint> buf(4*R*C+1);
-    size_t bufb=0,bufe=1;
-    sint usedi=1;
-
-    int64_t iter=0;
     while(true){
-        fint si=rand()%sols.size();
-        Sol& sol = sols[si];
-        auto& mem = sol.mem;
-
-        fint ci=rand()%sol.usableCastles.size();
-        auto cit=sol.usableCastles.begin();
-        advance(cit, ci); // TODO optimizable
-        const Castle& cas = castles[*cit];
-        for_neighbors(cas.i, neigh, {
-            if (mem[neigh]!=0 && mem[neigh]!=cas.size){
-                // this castle can't ever be taken since it is near a zone with the same wanted size
-                sol.usableCastles.erase(cit);
-                continue;
+        int s=rand()%sols.size();
+        Sol newSol=sols[s];
+        int K=1+(rand()%6);
+        for(int k=0;k<K;++k){
+            if(rand() > RAND_MAX/3) {
+                newSol.deletePole();
+            } else {
+                newSol.readdPole();
             }
-        })
-
-        fint touchedCastlesSoFar=0;
-        fint oneTouchedCastle=0; // chooses one random castle among touched ones
-        fint usedCount=0;
-
-        bufb=0; bufe=1; buf[0]=cas.i;
-        while(bufb!=bufe){
-            sint i = buf[bufb++];
-
-            if (used[i] == usedi) continue;
-            for_neighbors(i, neigh, if(mem[neigh] == cas.size) continue;)
-            if (mem[i] != 0 || !(grid[i]==0 || grid[i]==cas.size) || manh_dist(i, cas.i) >= cas.size) continue;
-
-            used[i] = usedi;
-            usedCount += 1;
-            for_neighbors(i, neigh, buf[bufe++] = neigh;)
         }
 
-        //deb(usedCount, cas.size);
-        if (usedCount>=cas.size) {
-            bufb=0; bufe=1; buf[0]=cas.i;
-            int toFill=cas.size;
-            while(toFill>0){
-                sint i = buf[bufb++];
-
-                if (used[i] != usedi) continue;
-                used[i] = 0;
-                mem[i] = cas.size;
-
-                for_neighbors(i, neigh, buf[bufe++] = neigh;)
-                if(rand() < INT_MAX/min(toFill,10)){
-                    int a=rand()%(bufe-bufb);
-                    int b=rand()%(bufe-bufb);
-                    swap(buf[bufb+a], buf[bufb+b]);
-                }
-
-                toFill--;
-            }
-
-            sol.taken += cas.size;
-            sol.usableCastles.erase(cas.i);
-        }
-
-        usedi+=1; // let it overflow
-        if(usedi==0){
-            usedi+=1;
-            fill(used.begin(),used.end(),0);
-        }
-
-        iter+=1;
-        if (iter % ((R+C)*10) == 0 && sols.size() <= min((R+C)/2, 1024*1024/(R*C+R+C+128))) {
-            int ssize=sols.size();
-            for(int s=0;s<ssize;++s){
-                sols.push_back(sols[s]);
-            }
-            deb("Iter:", iter, "Score:", sols[0].taken);
+        int s1=rand()%sols.size();
+        if(newSol.completed>=sols[s1].completed || rand() < RAND_MAX/max((int)5, (int)30-(int)sols.size())){
+            sols[s1]=newSol;
         }
     }
+
     return 0;
 }
