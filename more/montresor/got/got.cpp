@@ -57,35 +57,34 @@ struct Sol {
         mem.resize(R*C,NONE);
         completed = 0;
 
-        queue<pair<sint,sint>> q;
+        queue<sint> q;
         for(sint j=0;j<J;++j){
-            q.push(pair<sint,sint>(castles[j].i, j));
+            q.push(castles[j].i);
             poles[j].missing = castles[j].size;
-        }
 
-        while(!q.empty()){
-            sint i,j;
-            tie(i,j)=q.front();
-            q.pop();
+            while(!q.empty()){
+                sint i=q.front();
+                q.pop();
 
-            if (mem[i] != NONE) continue;
-            const Castle& castle = castles[j];
-            if (grid[i] != 0 && grid[i] != castle.size) continue;
-            Pole& pole = poles[j];
-            if (pole.missing == 0) continue;
-            for_neighbors(i, neigh, if (mem[neigh] != NONE && mem[neigh] != j && castles[mem[neigh]].size == castle.size) continue;)
+                if (mem[i] != NONE) continue;
+                const Castle& castle = castles[j];
+                if (grid[i] != 0 && grid[i] != castle.size) continue;
+                Pole& pole = poles[j];
+                if (pole.missing == 0) continue;
+                for_neighbors(i, neigh, if (mem[neigh] != NONE && mem[neigh] != j && castles[mem[neigh]].size == castle.size) continue;)
 
-            pole.missing -= 1;
-            if (pole.missing == 0) {
-                completed += castle.size;
-            }
-            mem[i] = j;
-
-            for_neighbors(i, neigh, {
-                if (mem[neigh] == NONE && pole.missing != 0) {
-                    q.push(pair<sint,sint>(neigh, j));
+                pole.missing -= 1;
+                if (pole.missing == 0) {
+                    completed += castle.size;
                 }
-            })
+                mem[i] = j;
+
+                for_neighbors(i, neigh, {
+                    if (mem[neigh] == NONE && pole.missing != 0) {
+                        q.push(neigh);
+                    }
+                })
+            }
         }
 
         // deb("INITIAL!!");
@@ -267,7 +266,7 @@ void setupTimeLimit(){
 
     struct rlimit limit;
     getrlimit(RLIMIT_CPU, &limit);
-    limit.rlim_cur = 1;
+    limit.rlim_cur = 2;
     setrlimit(RLIMIT_CPU, &limit);
 }
 
