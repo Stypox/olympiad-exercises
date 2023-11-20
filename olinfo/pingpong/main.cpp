@@ -15,36 +15,30 @@ void deb(){cout<<"\n";}template<class T,class...Ts>void deb(const T&t,const Ts&.
 #define deb(...)
 #endif
 
-bool solve(int a, int b, int wona, int rem) {
-    if (a < (3-wona)*11 || rem <= 0) {
+bool solve(int a, int b) {
+    if (a<33 || a>53 || b>52 || (a-33+9)/10>b/11) {
         return false;
     }
 
-    if (wona == 2 && a == 11 && b < 11) {
-        out<<a<<" "<<b<<endl;
-        return true;
+    int times=0;
+    while(b>=11&&times<2) {
+        int ascore = min(max((int)0, a-33), (int)10);
+        a-=ascore;
+        b-=11;
+        out<<ascore<<" 11\n";
+        ++times;
     }
 
-    if (wona < 2) {
-        int lim = min(b, (int64_t)10);
-        for (int i=0;i<=lim;++i){
-            if (solve(a-11, b-i, wona+1, rem-1)) {
-                out<<11<<" "<<i<<endl;
-                return true;
-            }
-        }
+    assert(a == 33);
+    assert(b <= 30);
+    for(int i=0;i<3;++i){
+        int bscore = min(b, (int)10);
+        a-=11;
+        b-=bscore;
+        out<<11<<" "<<bscore<<"\n";
     }
 
-    if (rem > (3-wona) && b >= 11) {
-        for (int i=0;i<11;++i){
-            if (solve(a-i, b-11, wona, rem-1)) {
-                out<<i<<" "<<11<<endl;
-                return true;
-            }
-        }
-    }
-
-    return false;
+    return true;
 }
 
 signed main() {
@@ -54,7 +48,7 @@ signed main() {
         int A,B;
         in>>A>>B;
 
-        if (!solve(A, B, 0, 5)) {
+        if (!solve(A, B)) {
             out<<"-1 -1\n";
         }
 
