@@ -1,0 +1,6 @@
+/target
+rustbindings.hpp
+*.out
+*.o
+.vscode
+*.txt
